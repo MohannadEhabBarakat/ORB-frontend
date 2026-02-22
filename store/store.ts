@@ -1,10 +1,16 @@
 import { configureStore } from '@reduxjs/toolkit'
 import navReducer from './features/sidebar/navSlice'
+import globalReducer from './features/settings/global'
+import toolsReducer from './features/tools/tools'
+import labelReducer from './features/tools/labels'
 
 export const makeStore = () => {
   return configureStore({
     reducer: {
       nav: navReducer,
+      global: globalReducer,
+      tool: toolsReducer,
+      labels: labelReducer
     }
   })
 }

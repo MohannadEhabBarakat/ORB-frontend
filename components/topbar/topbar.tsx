@@ -1,42 +1,14 @@
-"use client";
-import { useState, useEffect, use } from "react";
-import { useSelector, useDispatch } from 'react-redux'
-import { setActive } from '@/store/features/sidebar/navSlice'
-import type { RootState } from '@/store/store'
-import { tr } from "motion/react-client";
+import Logo from "./logo";
+import Appearance from "./appearance";
+import Tools from "./tools";
 
-export default function Icon({ id, IconSVG }: { id: string, IconSVG: any}) {
-    const activeID = useSelector((state: RootState) => state.nav.active)
-    const dispatch = useDispatch()
-
-    const [isactive, setIsActive] = useState(false);
-    const [borderColor, setBorderColor] = useState("transparent");
-
-    useEffect(() => {
-        if (activeID === id) {
-            setIsActive(true);
-        } else {
-            setIsActive(false);
-        }
-    }, [activeID]);
-
-    useEffect(() => {
-        if (isactive) {
-            setBorderColor("border-l-black");
-        } else {
-            setBorderColor("border-l-transparent");
-        }
-
-    }, [isactive]);
-
-    const setMeActive = () => {
-        setIsActive(true);
-        dispatch(setActive(id))
-    }
-
+export default function Topbar() {
+    
     return (
-        <div className={`w-9 h-8 hover:cursor-pointer flex justify-end items-end border-l-2 border-transparent ${borderColor}`} onClick={setMeActive}>
-            <IconSVG className={`${isactive ? "text-black" : "text-gray-400"}`} />
+        <div className="w-full h-12 flex items-center justify-between px-5 bg-topbar-accent">
+            <Logo />
+            <Tools />
+            <Appearance />
         </div>
     );
 }  

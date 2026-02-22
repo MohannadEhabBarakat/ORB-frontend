@@ -6,7 +6,7 @@ import { Separator } from "@/components/ui/separator";
 export default function IconsBar() {
     
     return (
-        <div className="w-12 h-full flex flex-col items-center justify-start gap-4 py-4 bg-accent">
+        <div className="bg-input w-14 h-full flex flex-col items-center justify-start gap-4 py-4 ">
             <Icon id="workbench" IconSVG={ActivityIcon} />
             <Separator />
             <Icon id="datasets" IconSVG={ArchiveIcon} />

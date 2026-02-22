@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import StoreProvider from "@/store/StoreProvider";
-
+import { ThemeProvider } from "@/components/theme-provider";
+import { Toaster } from "@/components/ui/sonner"
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,14 +26,20 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <StoreProvider>
-      <html lang="en" className= "h-full w-full dark">
-        <body
-          className= "h-full w-full"
-        >
-          {children}
-        </body>
-      </html>
-    </StoreProvider>
+    <html lang="en" className="h-full w-full" suppressHydrationWarning>
+      <body className="h-full w-full">
+        <StoreProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <main className="h-full w-full">{children}</main>
+            <Toaster />
+          </ThemeProvider>
+        </StoreProvider>
+      </body>
+    </html>
   );
 }

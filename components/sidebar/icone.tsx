@@ -22,7 +22,7 @@ export default function Icon({ id, IconSVG }: { id: string, IconSVG: any}) {
 
     useEffect(() => {
         if (isactive) {
-            setBorderColor("border-l-black");
+            setBorderColor("border-l-sidebar-primary-foreground");
         } else {
             setBorderColor("border-l-transparent");
         }
@@ -35,8 +35,8 @@ export default function Icon({ id, IconSVG }: { id: string, IconSVG: any}) {
     }
 
     return (
-        <div className={`w-9 h-8 hover:cursor-pointer flex justify-end items-end border-l-2 border-transparent ${borderColor}`} onClick={setMeActive}>
-            <IconSVG className={`${isactive ? "text-black" : "text-gray-400"}`} />
+        <div className={`w-9 h-8 hover:cursor-pointer flex justify-center items-center border-l-2 border-transparent ${borderColor}`} onClick={setMeActive}>
+            <IconSVG size={24} className={`${isactive ? "text-sidebar-primary-foreground" : "text-sidebar-ring"}`} />
         </div>
     );
 }  
