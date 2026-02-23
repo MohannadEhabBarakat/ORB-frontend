@@ -14,6 +14,7 @@ import { toast } from "sonner"
 
 export default function LabelForm({ className, setOpen }: {className?: string, setOpen: (open: boolean) => void}) {
     const [selectedColor, setSelectedColor] = useState("bg-blue-500")
+    const [labelName, setLabelName] = useState("Edema");
     const labels = useSelector((state: RootState) => state.labels.labels);
     const dispatch = useDispatch();
 
@@ -31,11 +32,9 @@ export default function LabelForm({ className, setOpen }: {className?: string, s
     ]
     const disabledColors = ["bg-slate-00"]
 
-    const handleSubmit = (e: React.SubmitEvent) => {
-        e.preventDefault();
-        const labelName = (e.target as any)[0].value; 
-        console.log(labelName)
-        // alert(selectedColor)
+    const handleSubmit = (e?: React.SubmitEvent) => {
+        e?.preventDefault();
+        
         const isDuplicate = labels.some(label => label.name === labelName);
         if (isDuplicate) {
               toast("Label name already exists", {
@@ -52,7 +51,7 @@ export default function LabelForm({ className, setOpen }: {className?: string, s
     <form className={cn("grid items-start gap-6", className)} onSubmit={handleSubmit}>
       <div className="grid gap-3">
         <Label htmlFor="label">Label</Label>
-        <Input type="text" id="label" defaultValue="Edema" required={true} />
+        <Input type="text" id="label" defaultValue="Edema" required onChange={(e) => setLabelName(e.target.value)} />
       </div>
       <div className="grid gap-3 w-full">
         <Label>Select Color</Label>
@@ -60,6 +59,8 @@ export default function LabelForm({ className, setOpen }: {className?: string, s
             <RadioGroup 
             defaultValue={selectedColor} 
             onValueChange={setSelectedColor}
+            // submit the form when double clicking a color
+            onDoubleClick={() => handleSubmit(new Event("submit") as any)}
             className="grid grid-cols-4 grid-rows-5 grid-flow-col gap-2 w-fit"
             >
             {colors.map((color) => (

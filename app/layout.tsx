@@ -4,6 +4,7 @@ import "./globals.css";
 import StoreProvider from "@/store/StoreProvider";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner"
+import { TooltipProvider } from "@/components/ui/tooltip"
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -35,8 +36,10 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
+            <TooltipProvider>
             <main className="h-full w-full">{children}</main>
             <Toaster />
+            </TooltipProvider>
           </ThemeProvider>
         </StoreProvider>
       </body>
