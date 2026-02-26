@@ -13,9 +13,9 @@ export default function Case() {
       };
   return (
     <div className="rounded-md  px-4 py-2 gap-2 justify-between items-center text-sm flex " onDoubleClick={handleDoubleClick}>
-      <File size={16} className="min-w-4" />
-      <p className="text-muted-foreground">100 Market St, San Francisco</p>
-      <Settings size={12} className="min-w-3 text-muted-foreground" onClick={handleSettingsClick} />
+        <File size={16} className="min-w-4" />
+        <p className="text-muted-foreground">100 Market St, San Francisco</p>
+        <Settings size={12} className="min-w-3 text-muted-foreground" onClick={handleSettingsClick} />
     </div>
   );
 }
