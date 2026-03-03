@@ -3,12 +3,13 @@ import type { PayloadAction } from '@reduxjs/toolkit'
 
 export interface ToolsState {
   tool: string,
-  size?: boolean,
+  size?: number,
   color?: string,
 }
 
 const initialState: ToolsState = {
     tool: "cursor",
+    size: 30,
 }
 
 export const toolsSlice = createSlice({
@@ -18,7 +19,7 @@ export const toolsSlice = createSlice({
     setTool: (state, action: PayloadAction<string>) => {
       state.tool = action.payload
     },
-    setSize: (state, action: PayloadAction<boolean>) => {
+    setSize: (state, action: PayloadAction<number>) => {
         state.size = action.payload
     },
     setColor: (state, action: PayloadAction<string>) => {

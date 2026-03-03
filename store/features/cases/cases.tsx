@@ -10,80 +10,83 @@ export interface FileTreeState {
 
 // Populating initial state with your provided nested data
 const initialState: FileTreeState = {
-  fileTree: [
-    {
-      name: "Patient_001",
-      labels: [{ name: "volume.nii", url: "https://example.com/volume.nii" }],
-      items: [
-        {
-          name: "Study_MRI_Brain_2023-10-15",
-          labels: [{ name: "volume.nii", url: "https://example.com/volume.nii" }],
-          items: [
-            {
-              name: "Series_01_T1_Weighted",
-              labels: [{ name: "volume.nii", url: "https://example.com/volume.nii" }],
-              items: [{ name: "volume.nii", url: "https://example.com/volume.nii" }],
-            },
-            {
-              name: "Series_02_T2_FLAIR",
-              items: [
-                { name: "slice_001.dicom", url: "https://example.com/slice_001.dicom"  },
-                { name: "slice_002.dicom", url: "https://example.com/slice_002.dicom" },
-                { name: "slice_003.dicom", url: "https://example.com/slice_003.dicom" },
-              ],
-            },
-          ],
-        },
-        {
-          name: "Study_CT_Head_2024-01-20",
-          items: [
-            {
-              name: "Series_01_Axial_NonContrast",
-              items: [{ name: "reconstruction.nii", url: "https://example.com/reconstruction.nii" }],
-            },
-          ],
-        },
-      ],
-    },
-    {
-      name: "Patient_002",
-      items: [
-        {
-          name: "Study_CT_Chest_2023-11-02",
-          items: [
-            {
-              name: "Series_01_HighRes_Chest",
-              items: [
-                { name: "slice_001.dicom", url: "https://example.com/slice_001.dicom" },
-                { name: "slice_002.dicom", url: "https://example.com/slice_002.dicom" },
-                { name: "slice_003.dicom", url: "https://example.com/slice_003.dicom" },
-                { name: "slice_004.dicom", url: "https://example.com/slice_004.dicom" },
-              ],
-            },
-          ],
-        },
-      ],
-    },
-    {
-      name: "Patient_003",
-      items: [
-        {
-          name: "Study_MRI_Spine_2024-02-10",
-          items: [
-            {
-              name: "Series_01_Sagittal_T2",
-              items: [{ name: "sagittal_spine.nii", url: "https://example.com/sagittal_spine.nii" }],
-            },
-            {
-              name: "Series_02_Axial_T2",
-              items: [{ name: "axial_spine.nii", url: "https://example.com/axial_spine.nii" }],
-            },
-          ],
-        },
-      ],
-    },
-  ],
-};
+  fileTree: [],
+}
+// const initialState: FileTreeState = {
+//   fileTree: [
+//     {
+//       name: "Patient_001",
+//       labels: [{ name: "volume.nii", url: "https://example.com/volume.nii" }],
+//       items: [
+//         {
+//           name: "Study_MRI_Brain_2023-10-15",
+//           labels: [{ name: "volume.nii", url: "https://example.com/volume.nii" }],
+//           items: [
+//             {
+//               name: "Series_01_T1_Weighted",
+//               labels: [{ name: "volume.nii", url: "https://example.com/volume.nii" }],
+//               items: [{ name: "volume.nii", url: "https://example.com/volume.nii" }],
+//             },
+//             {
+//               name: "Series_02_T2_FLAIR",
+//               items: [
+//                 { name: "slice_001.dicom", url: "https://example.com/slice_001.dicom"  },
+//                 { name: "slice_002.dicom", url: "https://example.com/slice_002.dicom" },
+//                 { name: "slice_003.dicom", url: "https://example.com/slice_003.dicom" },
+//               ],
+//             },
+//           ],
+//         },
+//         {
+//           name: "Study_CT_Head_2024-01-20",
+//           items: [
+//             {
+//               name: "Series_01_Axial_NonContrast",
+//               items: [{ name: "reconstruction.nii", url: "https://example.com/reconstruction.nii" }],
+//             },
+//           ],
+//         },
+//       ],
+//     },
+//     {
+//       name: "Patient_002",
+//       items: [
+//         {
+//           name: "Study_CT_Chest_2023-11-02",
+//           items: [
+//             {
+//               name: "Series_01_HighRes_Chest",
+//               items: [
+//                 { name: "slice_001.dicom", url: "https://example.com/slice_001.dicom" },
+//                 { name: "slice_002.dicom", url: "https://example.com/slice_002.dicom" },
+//                 { name: "slice_003.dicom", url: "https://example.com/slice_003.dicom" },
+//                 { name: "slice_004.dicom", url: "https://example.com/slice_004.dicom" },
+//               ],
+//             },
+//           ],
+//         },
+//       ],
+//     },
+//     {
+//       name: "Patient_003",
+//       items: [
+//         {
+//           name: "Study_MRI_Spine_2024-02-10",
+//           items: [
+//             {
+//               name: "Series_01_Sagittal_T2",
+//               items: [{ name: "sagittal_spine.nii", url: "https://example.com/sagittal_spine.nii" }],
+//             },
+//             {
+//               name: "Series_02_Axial_T2",
+//               items: [{ name: "axial_spine.nii", url: "https://example.com/axial_spine.nii" }],
+//             },
+//           ],
+//         },
+//       ],
+//     },
+//   ],
+// };
 
 export const casesSlice = createSlice({
   name: 'cases',
@@ -95,10 +98,10 @@ export const casesSlice = createSlice({
     },
     // Adds a new item to the root level of the tree
     addPatient: (state, 
-      action: PayloadAction<{patientName:string, exists_ok?:boolean}> ) => {
-      const {patientName, exists_ok} = action.payload
+      action: PayloadAction<{patientName:string}> ) => {
+      const {patientName} = action.payload
       const patient_found = state.fileTree.find((p) => p.name === patientName);
-      if (patient_found && !exists_ok){return}
+      if (patient_found || patientName===""){return}
       const patient = {name: patientName, items:[], labels:[]}
       state.fileTree.push(patient);
     },
@@ -108,18 +111,20 @@ export const casesSlice = createSlice({
     },
     addStudy: (
       state,
-      action: PayloadAction<{ patientName: string; studyName: string, exists_ok:boolean }>
+      action: PayloadAction<{ patientName: string; studyName: string}>
     ) => {
-      const { patientName, studyName, exists_ok } = action.payload;
+      const { patientName, studyName } = action.payload;
       // addPatient({patientName, exists_ok})
       // casesSlice.caseReducers.addPatient(state, action)
       casesSlice.caseReducers.addPatient(state, { 
           ...action, 
-          payload: { ...action.payload, exists_ok: true } 
+          payload: { ...action.payload} 
         });
 
       const patient = state.fileTree.find((p) => p.name === patientName);
       if (!patient || !patient.items){return}
+      const study_found = patient.items.find((s) => s.name === studyName);
+      if (study_found || studyName===""){return}
       const study = {name: studyName, items:[], labels:[]}
       patient.items.push(study);
       
@@ -137,18 +142,20 @@ export const casesSlice = createSlice({
     },
     addSeries: (
       state,
-      action: PayloadAction<{ patientName: string; studyName: string, seriesName:string, exists_ok:boolean }>
+      action: PayloadAction<{ patientName: string; studyName: string, seriesName:string}>
     ) => {
-      const { patientName, studyName, seriesName, exists_ok } = action.payload;
-      console.log({ patientName, studyName, seriesName, exists_ok })
+      const { patientName, studyName, seriesName } = action.payload;
+      console.log({ patientName, studyName, seriesName })
       // casesSlice.caseReducers.addStudy(state, action)
       casesSlice.caseReducers.addStudy(state, { 
           ...action, 
-          payload: { ...action.payload, exists_ok: true } 
+          payload: { ...action.payload } 
         });
       const patient = state.fileTree.find((p) => p.name === patientName);
       const study = patient?.items?.find((s) => s.name === studyName);
-      if (!study || !study.items){return}
+      if (!study || !study.items || seriesName===""){return}
+      const series_found = study.items.find((ser) => ser.name === seriesName);
+      if (series_found){return}
       const seires = {name: seriesName, items:[], labels:[]}
       study.items.push(seires);
     },
@@ -171,7 +178,6 @@ export const casesSlice = createSlice({
         seriesName: string;
         fileName: string; 
         url: string;
-        exists_ok:boolean;
       }>
     ) => {
       const { patientName, studyName, seriesName, fileName, url } = action.payload;
@@ -179,7 +185,7 @@ export const casesSlice = createSlice({
       // addSeries({patientName, studyName, seriesName, exists_ok:true })
       casesSlice.caseReducers.addSeries(state, { 
           ...action, 
-          payload: { ...action.payload, exists_ok: true } 
+          payload: { ...action.payload } 
         });
       const patient = state.fileTree.find((p) => p.name === patientName);
       const study = patient?.items?.find((s) => s.name === studyName);
@@ -222,7 +228,6 @@ export const casesSlice = createSlice({
         seriesName: string;
         fileName: string; 
         url: string;
-        exists_ok:boolean;
       }>
     ) => {
       const { patientName, studyName, seriesName, fileName, url } = action.payload;
@@ -230,7 +235,7 @@ export const casesSlice = createSlice({
       // addSeries({patientName, studyName, seriesName, exists_ok:true })
       casesSlice.caseReducers.addSeries(state, { 
           ...action, 
-          payload: { ...action.payload, exists_ok: true } 
+          payload: { ...action.payload} 
         });
       const patient = state.fileTree.find((p) => p.name === patientName);
       const study = patient?.items?.find((s) => s.name === studyName);
@@ -238,8 +243,26 @@ export const casesSlice = createSlice({
 
       if (series && series.labels) {
         series.labels.push({ name: fileName, url: url});
+        return
       } else if(series){      
         series.labels = [{ name: fileName, url: url}];
+        return
+      }
+      if(study && study.labels){
+        study.labels.push({ name: fileName, url: url});
+        return
+      }
+      else if(study){
+        study.labels = [{ name: fileName, url: url}];
+        return
+      }
+      if(patient && patient.labels){
+        patient.labels.push({ name: fileName, url: url});
+        return
+      }
+      else if(patient){
+        patient.labels = [{ name: fileName, url: url}];
+        return
       }
     },
     removeLabel: (

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Collapsible,
@@ -32,6 +32,9 @@ export default function Cases() {
   const fileTree = useSelector((state: RootState) => state.cases.fileTree);
   const dispatch = useDispatch();
 
+  useEffect(() => {
+    console.log("File tree updated:", fileTree);
+  }, [fileTree]);
   return (
     <Collapsible
       open={isOpen}

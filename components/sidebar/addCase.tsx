@@ -87,10 +87,10 @@ export default function AddCase({ setOpen }:{ setOpen: (open: boolean) => void }
         console.log({patient_, study_, series_, fileName, url, isLabel})
 
         if(isLabel){
-            dispatch(addLabel({ patientName: patient_, studyName: study_, seriesName: series_, fileName, url, exists_ok:true }))
+            dispatch(addLabel({ patientName: patient_, studyName: study_, seriesName: series_, fileName, url}))
         }
         else{
-            dispatch(addFile({ patientName: patient_, studyName: study_, seriesName: series_, fileName, url, exists_ok:true }))
+            dispatch(addFile({ patientName: patient_, studyName: study_, seriesName: series_, fileName, url}))
         }
 
         setOpen(false)
@@ -130,7 +130,7 @@ export default function AddCase({ setOpen }:{ setOpen: (open: boolean) => void }
             </div>
             <div className=" flex justify-start items-center w-full gap-2">
                 <Label htmlFor="file">Upload file</Label>
-                <Input type="file" accept=".nii,.nii.gz,.dcm,.dicom" id="file" className="max-w-[70%]" ref={fileRef} onChange={(e:ChangeEvent<HTMLInputElement>)=>setFile(e.target.files?.[0])} />
+                <Input type="file" accept=".nii,.nii.gz,.dcm,.dicom,application/gzip,application/x-gzip" id="file" className="max-w-[70%]" ref={fileRef} onChange={(e:ChangeEvent<HTMLInputElement>)=>setFile(e.target.files?.[0])} />
             </div>
 
             <Button className="bg-red-900 hover:bg-red-500 text-white font-bold" onClick={upload}>upload</Button>

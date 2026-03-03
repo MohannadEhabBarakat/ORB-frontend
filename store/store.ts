@@ -4,6 +4,7 @@ import globalReducer from './features/settings/global'
 import toolsReducer from './features/tools/tools'
 import labelReducer from './features/tools/labels'
 import caseReducer from './features/cases/cases'
+import annotatorReducer from './features/annotator/annotator'
 
 export const makeStore = () => {
   return configureStore({
@@ -13,6 +14,7 @@ export const makeStore = () => {
       tool: toolsReducer,
       labels: labelReducer, 
       cases: caseReducer,
+      annotator: annotatorReducer,
     }
   })
 }

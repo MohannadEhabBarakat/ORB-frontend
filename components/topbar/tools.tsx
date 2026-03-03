@@ -11,15 +11,21 @@ import { Slider } from "@/components/ui/slider";
 export default function Tools() {
   const activeID = useSelector((state: RootState) => state.nav.active);
   const dispatch = useDispatch();
+  const defaultToolSize = useSelector((state: RootState) => state.tool.size);
 
   const [toolActive, setToolActive] = useState("cursor");
-  const [toolSize, setToolSize] = useState(0);
+  const [toolSize, setToolSize] = useState(defaultToolSize||30);
   const [toolColor, setToolColor] = useState("black");
 
   const handleToolChange = (tool: string) => {
     setToolActive(tool);
     dispatch(setTool(tool));
   };
+
+  const handleSizeChange = (size: number) => {
+    setToolSize(size);
+    dispatch(setSize(size));
+  }
 
   return (
     <div className="flex items-center space-x-4">
@@ -51,7 +57,7 @@ export default function Tools() {
       </ToggleGroup>
 
       <div
-        className={`flex items-center space-x-4 h-full justify-center transition-all duration-500 ease-in
+        className={`flex items-center space-x-4 h-full justify-center transition-all duration-400 ease-in
           ${toolActive === "cursor" ? "max-w-0 opacity-0" : "max-w-xs opacity-100"} overflow-hidden`}>
         <div className="flex items-center space-x-2 h-full justify-center">
           <label
@@ -61,10 +67,11 @@ export default function Tools() {
             Size
           </label>
           <Slider
-            defaultValue={[75]}
-            max={100}
+            defaultValue={[toolSize]}
+            max={50}
             step={1}
             className="mx-auto w-20 max-w-xs hover:cursor-pointer"
+            onValueChange={([value]) => handleSizeChange(value)}
           />
         </div>
         <ColorSelect

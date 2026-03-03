@@ -6,6 +6,8 @@ import {
 } from "@/components/ui/resizable"
 import MainMenu from "@/components/sidebar/mainMenu";
 import Topbar from "@/components/topbar/topbar";
+import Viewer from "@/components/viewer/viewer";
+
 
 export default function Home() {
   return (
@@ -19,7 +21,7 @@ export default function Home() {
       <ResizableHandle withHandle />
 
       <ResizablePanel>
-        
+        <Viewer />
       </ResizablePanel>
 
     </ResizablePanelGroup>

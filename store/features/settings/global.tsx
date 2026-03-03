@@ -4,12 +4,14 @@ import type { PayloadAction } from '@reduxjs/toolkit'
 export interface GlobalState {
     isDark: boolean,
     isRadiologyMode: boolean,
+    vieweMode: "axial" | "sagittal" | "coronal" | "multiplanar" | "row2d"
     
 }
 
 const initialState: GlobalState = {
     isDark: false,
     isRadiologyMode: false,
+    vieweMode: "multiplanar"
 }
 
 export const globalSlice = createSlice({
@@ -27,13 +29,16 @@ export const globalSlice = createSlice({
     },
     setRadiologyMode: (state, action: PayloadAction<boolean>) => {
         state.isRadiologyMode = action.payload
-    }
-
+    },
+    setViewMode: (state, action: PayloadAction<"axial" | "sagittal" | "coronal" | "multiplanar" | "row2d">) => {
+        state.vieweMode = action.payload
+    },
 
   },
 })
 
 // Action creators are generated for each case reducer function
-export const { toggleDarkMode, toggleRadiologyMode, setDarkMode, setRadiologyMode } = globalSlice.actions
+export const { toggleDarkMode, toggleRadiologyMode, 
+  setDarkMode, setRadiologyMode, setViewMode } = globalSlice.actions
 
 export default globalSlice.reducer
