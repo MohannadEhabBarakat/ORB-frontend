@@ -1,33 +1,37 @@
-import { Niivue } from "@niivue/niivue";
-// --- ZOOM TO CURSOR LOGIC ---
-    const handleWheel = (e: WheelEvent, nvRef: React.RefObject<Niivue | null>, canvas: HTMLCanvasElement) => {
-      if (!nvRef.current) return;
-      e.preventDefault();
+const zoomSpeed = .1; // Adjusted for wheel sensitivity
+      const newScale = nvRef.current.scene.volScaleMultiplier + (delta * zoomSpeed);
+      nvRef.current.setScale(Math.min(Math.max(newScale, 0.5), 15));
+      //   nvRef.current.updateGLVolume()
+      // 2. Zoom the 2D Slices
+      // scene.pan2Dxyzmm is a 4-element array: [panX, panY, panZ, zoomFactor]
+      const current2DZoom = nvRef.current.scene.pan2Dxyzmm[3]; 
+      const new2DZoom = current2DZoom + (delta * zoomSpeed);
+    
+      // Constrain the 2D zoom to your desired min/max bounds and apply it
+      nvRef.current.scene.pan2Dxyzmm[3] = Math.min(Math.max(new2DZoom, 0.5), 15);
+      // 3. Pan to keep the crosshair centered
+      // Convert fractional positions (0.0 to 1.0) into real-world mm
+      const crosshairMM = nvRef.current.scene.crosshairPos
+      console.log({crosshairMM})
+      const volumeCenterMM = nvRef.current.frac2mm([0.5, 0.5, 0.5]); 
+      console.log({volumeCenterMM})
+      console.log("Calculated Pan Displacement (mm):", {
+        x: -(crosshairMM[0] - volumeCenterMM[0]),
+        y: -(crosshairMM[1] - volumeCenterMM[1]),
+        z: -(crosshairMM[2] - volumeCenterMM[2])
+      })
+      console.log("Current Pan (mm):", {
+        x: nvRef.current.scene.pan2Dxyzmm[0],
+        y: nvRef.current.scene.pan2Dxyzmm[1],
+        z: nvRef.current.scene.pan2Dxyzmm[2]
+      })
 
-      if (e.ctrlKey || e.metaKey) {
-        // 1. Move crosshair to mouse location
-        // We get the bounding rect to find the local canvas coordinates
-        const rect = canvas.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-
-        // nv.selectColortable(x, y) or similar isn't needed; 
-        // we use the internal click simulator to move the crosshair
-        nvRef.current.setDrawingEnabled(false); // Temporarily disable drawing to prevent marks
-        nvRef.current.mouseClick(x, y);
-        setDrawingEnabled()
-
-
-        // 2. Apply Scale
-        const zoomSpeed = 0.001;
-        const delta = -e.deltaY;
-        const newScale = nvRef.current + (delta * zoomSpeed);
-        
-        // Clamp and Draw
-        nvRef.current.setScale(Math.min(Math.max(newScale, 0.5), 15));
-        nvRef.current.draw();
-      } else {
-        // Regular slice scrolling
-        nvRef.current.sliceScroll2D(-e.deltaY * 0.2);
-      }
-    };
+      // Calculate the required pan displacement to lock onto the crosshair
+      // Note: Depending on your NiiVue radiological/neurological settings, 
+      // you might need to invert these by swapping (volumeCenterMM - crosshairMM)
+      nvRef.current.scene.pan2Dxyzmm[0] = crosshairMM[0]
+      nvRef.current.scene.pan2Dxyzmm[1] = crosshairMM[1]
+      nvRef.current.scene.pan2Dxyzmm[2] = crosshairMM[2]
+      
+      // 4. Force a re-render so the 2D views reflect the new zoom level
+      nvRef.current.drawScene();

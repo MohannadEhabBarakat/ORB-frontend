@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState, MouseEvent, use } from "react";
+import { useRef, useEffect, useState, Touch, TouchEvent } from "react";
 import { Niivue } from "@niivue/niivue";
 import { a } from "motion/react-client";
 import { color } from "motion";
@@ -21,6 +21,74 @@ export default function NiiVue({imageUrl, labelUrl, view, brushColor="red", brus
   const cursorRef = useRef<HTMLDivElement>(null);
   const [isHovering, setIsHovering] = useState(false);
   const crosshairWidth = 0.5
+  const mousePosRef = useRef({ x: 0, y: 0 });
+
+  const handleMouseMove = (e: MouseEvent) => {
+        mousePosRef.current = { x: e.clientX, y: e.clientY };
+    };
+  const handleWheel = (e: WheelEvent) => {
+      if (!nvRef.current) return;
+      if (e.ctrlKey || e.metaKey) {
+        // // CMD/CTRL + SCROLL = ZOOM
+        const drawing = nvRef.current.opts.drawingEnabled;
+        nvRef.current.setDrawingEnabled(false);
+        // 1. Capture the exact screen coordinates of the mouse during the scroll
+        const { clientX, clientY } = e;
+
+        // 2. Create a synthetic left-click to force NiiVue to move the crosshair
+        const pointerDown = new PointerEvent('mousedown', {
+            clientX, 
+            clientY,
+            button: 0,     // 0 = Main button (left)
+            buttons: 1,    // 1 = Left button is actively being pressed
+            bubbles: true,
+            cancelable: true,
+        });
+        
+        // 3. Create a synthetic release so NiiVue doesn't get stuck in a "drag" state
+        const pointerUp = new PointerEvent('mouseup', {
+            clientX, 
+            clientY,
+            button: 0,
+            buttons: 0,    // 0 = No buttons pressed
+            bubbles: true,
+            cancelable: true,
+        });
+
+        // 4. Dispatch the events to the canvas
+        canvas.current?.dispatchEvent(pointerDown);
+        canvas.current?.dispatchEvent(pointerUp);
+        nvRef.current.opts.dragMode = 3
+        nvRef.current.setDrawingEnabled(drawing);
+        
+      } else {
+        nvRef.current.opts.dragMode = 1
+      }
+    };
+
+    const handekKeyDown = (e: KeyboardEvent) => {
+        if (!nvRef.current) return;
+        console.log("Key pressed:", e.key);
+        if (e.key === 'ArrowLeft' || e.key === "ArrowRight"){
+            const delta = e.key === 'ArrowLeft' ? -1 : 1;
+            console.log("Simulating wheel event with delta:", delta);
+            const simulatedWheelEvent = new WheelEvent('wheel', {
+                                deltaY: delta,       // Vertical scroll amount
+                                deltaX: 0,       // Horizontal scroll amount
+                                deltaZ: 0,
+                                deltaMode: 0,    // 0 = pixels, 1 = lines, 2 = pages
+                                bubbles: true,   // Allows the event to bubble up the DOM
+                                cancelable: true, // Allows the event to be prevented
+                                clientX: mousePosRef.current.x, // Grab the tracked mouse X
+                                clientY: mousePosRef.current.y, // Grab the tracked mouse Y
+                                });
+
+        // 5. Dispatch the event onto the canvas
+        canvas.current?.dispatchEvent(simulatedWheelEvent);
+        } else if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'z') {
+            nvRef.current.drawUndo();
+        }
+    }
 
   useEffect(() => {
     if (!nvRef.current) return;
@@ -46,12 +114,12 @@ export default function NiiVue({imageUrl, labelUrl, view, brushColor="red", brus
     if (!nvRef.current) return;
     if (activeTool === "cursor") {
       nvRef.current.setDrawingEnabled(false);
-        nvRef.current.opts.crosshairWidth = crosshairWidth; 
-        }
-        else {
+      nvRef.current.opts.crosshairWidth = crosshairWidth; 
+    }
+    else {
         nvRef.current.setDrawingEnabled(true);
         nvRef.current.opts.crosshairWidth = 0;
-        }
+    }
     }
 
   
@@ -100,6 +168,7 @@ export default function NiiVue({imageUrl, labelUrl, view, brushColor="red", brus
     nv.attachToCanvas(canvas.current);
     await nv.loadVolumes(volumeList);
     if (activeTool === "brush" || activeTool === "eraser"){ 
+        
         nv.setDrawingEnabled(true);
         nv.opts.crosshairWidth = 0; 
     }
@@ -131,6 +200,17 @@ export default function NiiVue({imageUrl, labelUrl, view, brushColor="red", brus
       },
     ];
     setupAndLoad(volumeList);
+    // @ts-ignore
+    canvas.current?.addEventListener('wheel', handleWheel, { passive: false });
+    window.addEventListener('keydown', handekKeyDown);
+    window.addEventListener('mousemove', handleMouseMove);
+    
+    return () => {
+        // @ts-ignore
+        canvas.current?.removeEventListener('wheel', handleWheel);
+        window.removeEventListener('keydown', handekKeyDown);
+        window.removeEventListener('mousemove', handleMouseMove);
+    }
   }, [imageUrl, labelUrl]);
 
   return(
@@ -141,6 +221,9 @@ export default function NiiVue({imageUrl, labelUrl, view, brushColor="red", brus
         // onMouseMove={handleMouseMove}
         onMouseEnter={() => setIsHovering(true)}
         onMouseLeave={() => setIsHovering(false)} 
+        // onTouchStart={handleTouchStart}
+        // onWheel={handleWheel}
+        // onTouchMove={handleTouchMove}
         />
         
         {/* {
