@@ -82,10 +82,10 @@ export default function DatasetsMyLabels() {
             <CollapsibleContent className="flex  flex-col gap-2 max-h-full">
                 {
                     !my_original_annotation && base_annotation_is_ready && base_annotation ?
-                        <CollapsibleFilesLabelsTree key="my_labels" fileTree={fileTree} />
+                        <CollapsibleFilesLabelsTree prefix="my_labels" fileTree={fileTree} />
                         :
                         my_original_annotation ?
-                            <CollapsibleFilesLabelsTree key="my_labels" fileTree={fileTree} />
+                            <CollapsibleFilesLabelsTree prefix="my_labels" fileTree={fileTree} />
                             :
                             <p className="text-xs">Base annotation not ready yet</p>
                 }
