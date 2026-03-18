@@ -26,16 +26,23 @@ import AddCase from "./addCase";
 import { useSelector, useDispatch } from 'react-redux'
 import type { RootState } from '@/store/store'
 import { DatasetsLoader } from "./datasetsLoader";
+import CollapsibleFilesLabelsTree from "./filesLabels";
 
 export default function DatasetsLabels() {
     const [isOpen, setIsOpen] = useState(false);
     const [uploadOpen, setUploadOpen] = useState(false);
-    const fileTree = useSelector((state: RootState) => state.cases.fileTree);
+    const [fileTree, setFileTree] = useState<any[]>([]);
+    const workItem = useSelector((state: RootState) => state.datasets.workItem);
+    const my_original_annotation = useSelector((state: RootState) => state.datasets.workItem?.my_original_annotation);
+    const base_annotation_is_ready = useSelector((state: RootState) => state.datasets.workItem?.base_annotation_is_ready);
+    const base_annotation = useSelector((state: RootState) => state.datasets.workItem?.base_annotation);
+
     const dispatch = useDispatch();
 
     useEffect(() => {
-        console.log("File tree updated:", fileTree);
-    }, [fileTree]);
+        console.log("File tree updated:", workItem?.base_annotation);
+        setFileTree([workItem?.base_annotation]);
+    }, [workItem]);
 
     return (
         <Collapsible
@@ -74,7 +81,15 @@ export default function DatasetsLabels() {
             </div>
 
             <CollapsibleContent className="flex  flex-col gap-2 max-h-full">
-                <CollapsibleFileTree fileTree={fileTree} />
+                {
+                    !my_original_annotation && base_annotation_is_ready && base_annotation ?
+                        <CollapsibleFilesLabelsTree prefix="base_labels" fileTree={fileTree} />
+                        :
+                        !my_original_annotation && (!base_annotation_is_ready || !base_annotation) ?
+                            <p className="text-xs">No base annotation available</p>
+                            :
+                            <p className="text-xs">No annotation. You are the first annotator for this case.</p>
+                }
             </CollapsibleContent>
         </Collapsible>
 

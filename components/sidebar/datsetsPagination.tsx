@@ -62,12 +62,13 @@ export default function DatasetsPagination() {
 
     useEffect(() => {
         if (currentPage <= 3) {
+            console.log({ worklistSize })
             setPages(Array.from({ length: Math.min(worklistSize, 3) }, (_, i) => i + 1))
         } else {
             setPages([currentPage - 2, currentPage - 1, currentPage])
         }
         // @ts-ignore
-        dispatch(fetchWorkItem({ token, dataset_name, idx: currentPage }))
+        dispatch(fetchWorkItem({ token, dataset_name, idx: currentPage - 1 }))
     }, [currentPage, worklistSize])
 
     const handleTooltipClick = () => {

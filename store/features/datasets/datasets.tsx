@@ -72,7 +72,7 @@ const initialState: DatasetsState = {
   status: 'idle',
   worklist_status: 'idle',
   error: null,
-  worklist_size: 20,
+  worklist_size: 0,
   currentPage: 1,
   workItem: null,
   workItemStatus: 'idle',

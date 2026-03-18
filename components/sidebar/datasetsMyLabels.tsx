@@ -26,16 +26,22 @@ import AddCase from "./addCase";
 import { useSelector, useDispatch } from 'react-redux'
 import type { RootState } from '@/store/store'
 import { DatasetsLoader } from "./datasetsLoader";
+import CollapsibleFilesLabelsTree from "./filesLabels";
 
 export default function DatasetsMyLabels() {
     const [isOpen, setIsOpen] = useState(false);
     const [uploadOpen, setUploadOpen] = useState(false);
-    const fileTree = useSelector((state: RootState) => state.cases.fileTree);
+    const [fileTree, setFileTree] = useState<any[]>([]);
+    const workItem = useSelector((state: RootState) => state.datasets.workItem);
+    const my_original_annotation = useSelector((state: RootState) => state.datasets.workItem?.my_original_annotation);
+    const base_annotation_is_ready = useSelector((state: RootState) => state.datasets.workItem?.base_annotation_is_ready);
+    const base_annotation = useSelector((state: RootState) => state.datasets.workItem?.base_annotation);
     const dispatch = useDispatch();
 
     useEffect(() => {
-        console.log("File tree updated:", fileTree);
-    }, [fileTree]);
+        console.log("File tree updated:", workItem?.my_annotations);
+        setFileTree([workItem?.my_annotations]);
+    }, [workItem]);
 
     return (
         <Collapsible
@@ -74,7 +80,15 @@ export default function DatasetsMyLabels() {
             </div>
 
             <CollapsibleContent className="flex  flex-col gap-2 max-h-full">
-                <CollapsibleFileTree fileTree={fileTree} />
+                {
+                    !my_original_annotation && base_annotation_is_ready && base_annotation ?
+                        <CollapsibleFilesLabelsTree key="my_labels" fileTree={fileTree} />
+                        :
+                        my_original_annotation ?
+                            <CollapsibleFilesLabelsTree key="my_labels" fileTree={fileTree} />
+                            :
+                            <p className="text-xs">Base annotation not ready yet</p>
+                }
             </CollapsibleContent>
         </Collapsible>
 

@@ -8,7 +8,7 @@ import {
     CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { ChevronUp, Upload, CircleQuestionMark } from "lucide-react";
-import CollapsibleFileTree from "./files";
+import CollapsibleFilesLabelsTree from "./filesCasesDatasets";
 import {
     Tooltip,
     TooltipContent,
@@ -26,7 +26,7 @@ import AddCase from "./addCase";
 import { useSelector, useDispatch } from 'react-redux'
 import type { RootState } from '@/store/store'
 import { DatasetsLoader } from "./datasetsLoader";
-
+import CollapsibleFilesCasesTree from "./filesCasesDatasets";
 
 export default function DatasetsCases() {
     const [isOpen, setIsOpen] = useState(false);
@@ -76,7 +76,7 @@ export default function DatasetsCases() {
             </div>
 
             <CollapsibleContent className="flex  flex-col gap-2 max-h-full">
-                <CollapsibleFileTree fileTree={fileTree} />
+                <CollapsibleFilesCasesTree prefix="case" fileTree={fileTree} />
             </CollapsibleContent>
         </Collapsible>
 
