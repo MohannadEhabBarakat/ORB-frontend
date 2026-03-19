@@ -6,6 +6,7 @@ import type { RootState } from '@/store/store'
 
 export default function LabelItem({ color, label, isOpen, value }: { isOpen: boolean, color: string, label: string, value: number }) {
   const dispatch = useDispatch();
+  const datasetName = useSelector((state: RootState) => state.datasets.selectedDataset);
   const deleteLabel = (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();

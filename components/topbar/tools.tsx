@@ -7,14 +7,16 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Pointer, Brush, Eraser } from "lucide-react";
 import ColorSelect from "./color/page";
 import { Slider } from "@/components/ui/slider";
+import { getLabels } from "@/store/features/tools/labels";
 
 export default function Tools() {
   const activeID = useSelector((state: RootState) => state.nav.active);
   const dispatch = useDispatch();
   const defaultToolSize = useSelector((state: RootState) => state.tool.size);
+  const datasetName = useSelector((state: RootState) => state.datasets.selectedDataset);
 
   const [toolActive, setToolActive] = useState("cursor");
-  const [toolSize, setToolSize] = useState(defaultToolSize||30);
+  const [toolSize, setToolSize] = useState(defaultToolSize || 30);
   const [toolColor, setToolColor] = useState("black");
 
   const handleToolChange = (tool: string) => {
@@ -27,9 +29,16 @@ export default function Tools() {
     dispatch(setSize(size));
   }
 
+  useEffect(() => {
+    if (datasetName) {
+      // @ts-ignore
+      dispatch(getLabels({ datasetName }));
+    }
+  }, [datasetName]);
+
   return (
     <div className="flex items-center space-x-4">
-      <ToggleGroup variant="outline" type="single" defaultValue="cursor" onValueChange={(value) => {if (value) handleToolChange(value);}}>
+      <ToggleGroup variant="outline" type="single" defaultValue="cursor" onValueChange={(value) => { if (value) handleToolChange(value); }}>
         <ToggleGroupItem
           value="cursor"
           aria-label="Toggle cursor"

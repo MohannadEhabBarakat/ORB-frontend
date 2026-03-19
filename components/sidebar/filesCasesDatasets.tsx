@@ -31,6 +31,7 @@ export default function CollapsibleFilesCasesTree({ prefix, fileTree }: { prefix
 
 
   const renderItem = (fileItem: FileTreeItem) => {
+    if (!fileItem) return null;
     if (fileItem.items && fileItem.items.length > 0) {
       return (
         <Collapsible key={prefix + "_" + fileItem.name}>

@@ -68,7 +68,7 @@ export default function DatasetsPagination() {
             setPages([currentPage - 2, currentPage - 1, currentPage])
         }
         // @ts-ignore
-        dispatch(fetchWorkItem({ token, dataset_name, idx: currentPage - 1 }))
+        if (token && dataset_name) dispatch(fetchWorkItem({ token, dataset_name, idx: currentPage - 1 }))
     }, [currentPage, worklistSize])
 
     const handleTooltipClick = () => {

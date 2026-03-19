@@ -2,6 +2,9 @@ import { useRef, useEffect, useState, Touch, TouchEvent } from "react";
 import { Niivue } from "@niivue/niivue";
 import { a } from "motion/react-client";
 import { color } from "motion";
+import { useSelector } from "react-redux";
+import type { RootState } from "@/store/store";
+import { tailwindClassToRgb } from "./colorsConverter";
 
 interface NiiVueProps {
   imageUrl: string | null;
@@ -23,6 +26,50 @@ export default function NiiVue({ imageUrl, labelUrl, view, brushColor = "red", b
   const [isHovering, setIsHovering] = useState(false);
   const crosshairWidth = 0.5
   const mousePosRef = useRef({ x: 0, y: 0 });
+  const labels = useSelector((state: RootState) => state.labels.labels);
+  const datasetName = useSelector((state: RootState) => state.datasets.selectedDataset);
+  const selectedColorName = useSelector((state: RootState) => state.labels.selectedLabel);
+
+  useEffect(() => {
+    if (selectedColorName) {
+      const selectedColor = labels.find((label) => label.name === selectedColorName)?.mask_value;
+      if (!selectedColor) return;
+      nvRef?.current?.setPenValue(selectedColor);
+    }
+  }, [selectedColorName])
+
+  const updateColormap = () => {
+
+    if (!nvRef.current) return;
+
+    const colours = labels.map((label) => tailwindClassToRgb(label.color))
+    const red = [0, ...colours.map((colour) => colour?.[0])]
+    const green = [0, ...colours.map((colour) => colour?.[1])]
+    const blue = [0, ...colours.map((colour) => colour?.[2])]
+    // const opacity = labels.map((label) => 1)
+    const labelValues = [0, ...labels.map((label) => label.mask_value)]
+    const names = ["Background", ...labels.map((label) => label.name)]
+
+
+    const cmap = {
+      R: red,
+      G: green,
+      B: blue,
+      I: labelValues,
+      labels: names
+    }
+    // @ts-ignore
+    nvRef.current.setDrawColormap(cmap);
+  }
+
+  useEffect(() => {
+    console.log("nvRef", nvRef.current?.volumes);
+  }, [labels, imageUrl, labelUrl])
+
+  useEffect(() => {
+    console.log("labels", labels);
+    updateColormap();
+  }, [labels, imageUrl, labelUrl])
 
   const handleMouseMove = (e: MouseEvent) => {
     mousePosRef.current = { x: e.clientX, y: e.clientY };
@@ -61,6 +108,7 @@ export default function NiiVue({ imageUrl, labelUrl, view, brushColor = "red", b
       canvas.current?.dispatchEvent(pointerUp);
       nvRef.current.opts.dragMode = 3
       nvRef.current.setDrawingEnabled(drawing);
+      updateColormap();
 
     } else {
       nvRef.current.opts.dragMode = 1
@@ -95,6 +143,7 @@ export default function NiiVue({ imageUrl, labelUrl, view, brushColor = "red", b
     if (!nvRef.current) return;
     nvRef.current.opts.penSize = brushSize;
     nvRef.current.opts.penType = 0;
+
   }, [brushColor, brushSize]);
 
   useEffect(() => {
@@ -146,6 +195,7 @@ export default function NiiVue({ imageUrl, labelUrl, view, brushColor = "red", b
       } else if (activeTool === "eraser") {
         nvRef.current.setPenValue(0);
       }
+      updateColormap();
     }, 600)
   }, [activeTool]);
 
@@ -159,48 +209,56 @@ export default function NiiVue({ imageUrl, labelUrl, view, brushColor = "red", b
 
   // I need to make draw meta data updates
   // I need to add update to colour maps and opacity
-  async function setupAndLoad(
-    volumeList: { url: string }[],
-  ) {
-    const nv = new Niivue();
-    console.log({ nv }, { volumeList })
-
-    //   @ts-ignore
-    nv.attachToCanvas(canvas.current);
-    await nv.loadVolumes(volumeList);
-    if (activeTool === "brush" || activeTool === "eraser") {
-
-      nv.setDrawingEnabled(true);
-      nv.opts.crosshairWidth = 0;
-    }
-    if (labelUrl) await nv.loadDrawingFromUrl(labelUrl);
-    nv.opts.dragAndDropEnabled = false
-    nv.setDrawOpacity(0.8);
-    nv.setSliceType(getNVView({ view, nv }))
-    nv.setMultiplanarLayout(3);
-    // nv.addEventListener('locationChange', handler);
-    const mouseEventConfig = {
-      leftButton: {
-        primary: 8,
-        withCtrl: 3
-      },
-      rightButton: 1,
-      centerButton: 3
-    }
-    nv.setMouseEventConfig(mouseEventConfig)
-    setRadiologicalConvention();
-    nvRef.current = nv;
-  }
 
   // upload and display the image/label using niivue
   useEffect(() => {
+
+    console.log("imageUrl", imageUrl);
+    console.log("labelUrl", labelUrl);
+    console.log("cmap", labels)
     if (!imageUrl) return;
+
     const volumeList = [
       {
         url: imageUrl,
         name: "image.nii.gz",
       },
     ];
+    async function setupAndLoad(
+      volumeList: { url: string }[],
+    ) {
+      const nv = new Niivue();
+      nvRef.current = nv;
+      nv.setMultiplanarLayout(3);
+      // console.log({ nv }, { volumeList })
+
+      //   @ts-ignore
+      nv.attachToCanvas(canvas.current);
+      await nv.loadVolumes(volumeList);
+      if (activeTool === "brush" || activeTool === "eraser") {
+
+        nv.setDrawingEnabled(true);
+        nv.opts.crosshairWidth = 0;
+      }
+      if (labelUrl) await nv.loadDrawingFromUrl(labelUrl);
+      nv.opts.dragAndDropEnabled = false
+      nv.setDrawOpacity(0.8);
+      nv.setSliceType(getNVView({ view, nv }))
+      // nv.addEventListener('locationChange', handler);
+      const mouseEventConfig = {
+        leftButton: {
+          primary: 8,
+          withCtrl: 3
+        },
+        rightButton: 1,
+        centerButton: 3
+      }
+      nv.setMouseEventConfig(mouseEventConfig)
+      updateColormap();
+      setRadiologicalConvention();
+      nvRef.current = nv;
+    }
+
     setupAndLoad(volumeList);
     // @ts-ignore
     canvas.current?.addEventListener('wheel', handleWheel, { passive: false });
