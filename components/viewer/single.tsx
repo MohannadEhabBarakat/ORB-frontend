@@ -22,6 +22,7 @@ export default function Single({
   const nvRef = useRef<Niivue>(null);
   const dispatch = useDispatch();
   const isRadiology = useSelector((state: RootState) => state.global.isRadiologyMode);
+  const show3D = useSelector((state: RootState) => state.global.show3D);
   return (
     <div className="w-full h-full flex flex-col">
       <NiiVue
@@ -34,6 +35,7 @@ export default function Single({
         tool={activeTool}
         isRadiology={isRadiology}
         nvRef={nvRef}
+        show3D={show3D}
       />
     </div>
   );
