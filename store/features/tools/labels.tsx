@@ -34,11 +34,13 @@ export interface Label {
 export interface LabelsState {
   labels: Label[],
   selectedLabel: string,
+  opacity: number,
 }
 
 const initialState: LabelsState = {
   labels: [],
   selectedLabel: "",
+  opacity: 1,
 }
 
 export const labelsSlice = createSlice({
@@ -53,6 +55,9 @@ export const labelsSlice = createSlice({
     },
     setSelectedLabel: (state, action: PayloadAction<string>) => {
       state.selectedLabel = action.payload;
+    },
+    setOpacity: (state, action: PayloadAction<number>) => {
+      state.opacity = action.payload;
     },
 
   },
@@ -80,6 +85,6 @@ export const labelsSlice = createSlice({
 })
 
 // Action creators are generated for each case reducer function
-export const { addLabel, removeLabel, setSelectedLabel } = labelsSlice.actions
+export const { addLabel, removeLabel, setSelectedLabel, setOpacity } = labelsSlice.actions
 
 export default labelsSlice.reducer

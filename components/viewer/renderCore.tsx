@@ -2,9 +2,11 @@ import { useRef, useEffect, useState, Touch, TouchEvent } from "react";
 import { Niivue } from "@niivue/niivue";
 import { a } from "motion/react-client";
 import { color } from "motion";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import type { RootState } from "@/store/store";
 import { tailwindClassToRgb } from "./colorsConverter";
+import { setDownloadLabel, setReset, setSave } from "@/store/features/annotator/annotator";
+import { uploadMaskToBackend } from "./save";
 
 interface NiiVueProps {
   imageUrl: string | null;
@@ -15,13 +17,13 @@ interface NiiVueProps {
   activeTool: string;
   tool: string;
   isRadiology: boolean;
-  nvRef: React.RefObject<Niivue | null>;
+  // nvRef: React.RefObject<Niivue | null>;
   show3D: boolean;
 }
 
-export default function NiiVue({ imageUrl, labelUrl, view, brushColor = "red", brushSize = 3, activeTool, isRadiology, nvRef, show3D }: NiiVueProps) {
+export default function NiiVue({ imageUrl, labelUrl, view, brushColor = "red", brushSize = 3, activeTool, isRadiology, show3D }: NiiVueProps) {
   const canvas = useRef<HTMLCanvasElement>(null);
-  //   const nvRef = useRef<any>(null);
+  const nvRef = useRef<Niivue | null>(null);
   const cursorRef = useRef<HTMLDivElement>(null);
   const [isHovering, setIsHovering] = useState(false);
   const crosshairWidth = 0.5
@@ -29,18 +31,73 @@ export default function NiiVue({ imageUrl, labelUrl, view, brushColor = "red", b
   const labels = useSelector((state: RootState) => state.labels.labels);
   const datasetName = useSelector((state: RootState) => state.datasets.selectedDataset);
   const selectedColorName = useSelector((state: RootState) => state.labels.selectedLabel);
+  const opacity = useSelector((state: RootState) => state.labels.opacity);
+  const downloadLabel = useSelector((state: RootState) => state.annotator.downloadLabel);
+  const save = useSelector((state: RootState) => state.annotator.save);
+  const reset = useSelector((state: RootState) => state.annotator.reset);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    if (save && labelUrl) {
+      uploadMaskToBackend(nvRef, labelUrl);
+    }
+    dispatch(setSave(false));
+  }, [save])
+
+  useEffect(() => {
+    if (reset) {
+      if (!nvRef.current) return;
+
+      mousePosRef.current = { x: 0, y: 0 };
+
+      // 1. Reset Pan (X and Y offsets)
+      nvRef.current?.volumes[0].resetAffine();
+      nvRef.current.updateGLVolume();
+
+      // 2. Reset Windowing (Contrast) to the image's robust min/max defaults
+      if (nvRef.current?.volumes?.length > 0) {
+        let vol = nvRef.current?.volumes[0];
+        vol.cal_min = vol.robust_min;
+        vol.cal_max = vol.robust_max;
+      }
+
+      // 3. Update the WebGL canvas to apply your changes
+      nvRef.current.updateGLVolume();
+      nvRef.current.drawScene();
+      dispatch(setReset(false));
+    }
+    dispatch(setReset(false))
+  }, [reset])
+
+  useEffect(() => {
+    if (downloadLabel && labelUrl) {
+      // @ts-ignore
+      nvRef.current?.saveImage({
+        filename: 'segmentation.nii.gz',
+        isSaveDrawing: true,
+      });
+
+    }
+    dispatch(setDownloadLabel(false));
+  }, [downloadLabel])
+
+  useEffect(() => {
+    if (!nvRef.current) return;
+    nvRef.current.setDrawOpacity(opacity);
+  }, [opacity])
 
   useEffect(() => {
     if (selectedColorName) {
       const selectedColor = labels.find((label) => label.name === selectedColorName)?.mask_value;
       if (!selectedColor) return;
+
       nvRef?.current?.setPenValue(selectedColor);
     }
   }, [selectedColorName])
 
-  const updateColormap = () => {
+  const updateColormap = (nv: Niivue) => {
 
-    if (!nvRef.current) return;
+    if (!nv) return;
 
     const colours = labels.map((label) => tailwindClassToRgb(label.color))
     const red = [0, ...colours.map((colour) => colour?.[0])]
@@ -58,8 +115,9 @@ export default function NiiVue({ imageUrl, labelUrl, view, brushColor = "red", b
       I: labelValues,
       labels: names
     }
+    // alert(cmap)
     // @ts-ignore
-    nvRef.current.setDrawColormap(cmap);
+    nv.setDrawColormap(cmap);
   }
 
   useEffect(() => {
@@ -68,14 +126,18 @@ export default function NiiVue({ imageUrl, labelUrl, view, brushColor = "red", b
 
   useEffect(() => {
     console.log("labels", labels);
-    updateColormap();
-  }, [labels, imageUrl, labelUrl])
+    if (!nvRef.current) return;
+    updateColormap(nvRef.current);
+  }, [labels])
 
   const handleMouseMove = (e: MouseEvent) => {
     mousePosRef.current = { x: e.clientX, y: e.clientY };
   };
+
   const handleWheel = (e: WheelEvent) => {
+
     if (!nvRef.current) return;
+    // alert(nvRef.current.volumes.length)
     if (e.ctrlKey || e.metaKey) {
       // // CMD/CTRL + SCROLL = ZOOM
       const drawing = nvRef.current.opts.drawingEnabled;
@@ -108,7 +170,7 @@ export default function NiiVue({ imageUrl, labelUrl, view, brushColor = "red", b
       canvas.current?.dispatchEvent(pointerUp);
       nvRef.current.opts.dragMode = 3
       nvRef.current.setDrawingEnabled(drawing);
-      updateColormap();
+      updateColormap(nvRef.current);
 
     } else {
       nvRef.current.opts.dragMode = 1
@@ -144,6 +206,8 @@ export default function NiiVue({ imageUrl, labelUrl, view, brushColor = "red", b
     nvRef.current.opts.penSize = brushSize;
     nvRef.current.opts.penType = 0;
 
+    setupDrawing(nvRef.current);
+
   }, [brushColor, brushSize]);
 
   useEffect(() => {
@@ -172,6 +236,25 @@ export default function NiiVue({ imageUrl, labelUrl, view, brushColor = "red", b
     }
   }
 
+  const setupDrawing = (inputNv: Niivue | null = null) => {
+    const nv = inputNv || nvRef.current;
+    // alert(activeTool)
+    if (!nv) return;
+    if (activeTool === "brush" || activeTool === "eraser") {
+      nv.setDrawingEnabled(true);
+      nv.opts.crosshairWidth = 0;
+    }
+
+    nv.setDrawOpacity(opacity);
+
+    if (selectedColorName) {
+      const selectedColor = labels.find((label) => label.name === selectedColorName)?.mask_value;
+      if (!selectedColor) return;
+      nv.setPenValue(selectedColor);
+    }
+
+    updateColormap(nv);
+  }
 
 
 
@@ -195,7 +278,7 @@ export default function NiiVue({ imageUrl, labelUrl, view, brushColor = "red", b
       } else if (activeTool === "eraser") {
         nvRef.current.setPenValue(0);
       }
-      updateColormap();
+      updateColormap(nvRef.current);
     }, 600)
   }, [activeTool]);
 
@@ -210,12 +293,19 @@ export default function NiiVue({ imageUrl, labelUrl, view, brushColor = "red", b
   // I need to make draw meta data updates
   // I need to add update to colour maps and opacity
 
+  // useEffect(() => {
+
+  // }, [labelUrl]);
+
   // upload and display the image/label using niivue
   useEffect(() => {
+    // console.log("imageUrl", imageUrl);
+    // console.log("labelUrl", labelUrl);
+    // console.log("cmap", labels)
+    // alert("hello")
+    nvRef.current = null;
 
-    console.log("imageUrl", imageUrl);
-    console.log("labelUrl", labelUrl);
-    console.log("cmap", labels)
+
     if (!imageUrl) return;
 
     const volumeList = [
@@ -227,20 +317,16 @@ export default function NiiVue({ imageUrl, labelUrl, view, brushColor = "red", b
     async function setupAndLoad(
       volumeList: { url: string }[],
     ) {
+      // console.log("volumeList", volumeList);
       const nv = new Niivue();
-      nvRef.current = nv;
+      mousePosRef.current = { x: 0, y: 0 };
+
       nv.setMultiplanarLayout(3);
-      // console.log({ nv }, { volumeList })
 
       //   @ts-ignore
       nv.attachToCanvas(canvas.current);
       await nv.loadVolumes(volumeList);
-      if (activeTool === "brush" || activeTool === "eraser") {
 
-        nv.setDrawingEnabled(true);
-        nv.opts.crosshairWidth = 0;
-      }
-      if (labelUrl) await nv.loadDrawingFromUrl(labelUrl);
       nv.opts.dragAndDropEnabled = false
       nv.setDrawOpacity(0.8);
       nv.setSliceType(getNVView({ view, nv }))
@@ -254,8 +340,13 @@ export default function NiiVue({ imageUrl, labelUrl, view, brushColor = "red", b
         centerButton: 3
       }
       nv.setMouseEventConfig(mouseEventConfig)
-      updateColormap();
       setRadiologicalConvention();
+      setupDrawing(nv);
+      console.log("labelUrl", labelUrl)
+
+      if (labelUrl) {
+        nv.loadDrawingFromUrl(labelUrl);
+      }
       nvRef.current = nv;
     }
 
@@ -264,6 +355,9 @@ export default function NiiVue({ imageUrl, labelUrl, view, brushColor = "red", b
     canvas.current?.addEventListener('wheel', handleWheel, { passive: false });
     window.addEventListener('keydown', handekKeyDown);
     window.addEventListener('mousemove', handleMouseMove);
+
+    // alert("updated ")
+
 
     return () => {
       // @ts-ignore
@@ -274,9 +368,11 @@ export default function NiiVue({ imageUrl, labelUrl, view, brushColor = "red", b
   }, [imageUrl, labelUrl]);
 
   return (
-    <div className="relative inline-block w-full h-full">
+    <div className="relative inline-block w-full h-full" id="canvas-container">
+      {labelUrl}
       <canvas ref={canvas}
         className={` w-full h-full`}
+        key={imageUrl || "" + labelUrl || ""}
         // className={`${activeTool !== "cursor" ? "cursor-none" : ""} w-full h-full`}
         // onMouseMove={handleMouseMove}
         onMouseEnter={() => setIsHovering(true)}

@@ -34,7 +34,7 @@ export default function Single({
         activeTool={activeTool}
         tool={activeTool}
         isRadiology={isRadiology}
-        nvRef={nvRef}
+        // nvRef={nvRef}
         show3D={show3D}
       />
     </div>
