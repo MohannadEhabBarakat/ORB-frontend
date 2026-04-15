@@ -35,12 +35,19 @@ export interface LabelsState {
   labels: Label[],
   selectedLabel: string,
   opacity: number,
+  localLabels: localLabel[],
+}
+
+export interface localLabel {
+  name: string,
+  mask: any,
 }
 
 const initialState: LabelsState = {
   labels: [],
   selectedLabel: "",
   opacity: 1,
+  localLabels: [],
 }
 
 export const labelsSlice = createSlice({
@@ -59,7 +66,20 @@ export const labelsSlice = createSlice({
     setOpacity: (state, action: PayloadAction<number>) => {
       state.opacity = action.payload;
     },
-
+    addLocalLabel: (state, action: PayloadAction<localLabel>) => {
+      // add if not exists, update otherwise
+      if (state.localLabels.find(label => label.name === action.payload.name)) {
+        state.localLabels = state.localLabels.map(label => label.name === action.payload.name ? action.payload : label);
+      } else {
+        state.localLabels.push(action.payload)
+      }
+    },
+    removeLocalLabel: (state, action: PayloadAction<string>) => {
+      state.localLabels = state.localLabels.filter(label => label.name !== action.payload);
+    },
+    clearLocalLabels: (state) => {
+      state.localLabels = [];
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -85,6 +105,6 @@ export const labelsSlice = createSlice({
 })
 
 // Action creators are generated for each case reducer function
-export const { addLabel, removeLabel, setSelectedLabel, setOpacity } = labelsSlice.actions
+export const { addLabel, removeLabel, setSelectedLabel, setOpacity, addLocalLabel, removeLocalLabel, clearLocalLabels } = labelsSlice.actions
 
 export default labelsSlice.reducer

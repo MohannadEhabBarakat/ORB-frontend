@@ -12,20 +12,44 @@ import { useSelector, useDispatch } from 'react-redux'
 import type { RootState } from '@/store/store'
 import { setActiveLabel, setActiveVolume } from "@/store/features/annotator/annotator";
 import { API_BASE_URL } from "@/store/api";
+import { getNiivueMaskBlob } from "@/components/viewer/save";
+import { addLocalLabel } from "@/store/features/tools/labels";
 
 export default function CollapsibleFilesCasesTree({ prefix, fileTree }: { prefix: string, fileTree: FileTreeItem[] }) {
 
   const BASE_URL = API_BASE_URL + "/annotations/{dataset_name}/case"
   const dataset_name = useSelector((state: RootState) => state.datasets.selectedDataset)
+  const nvRef = useSelector((state: RootState) => state.annotator.nvRef)
+  const activeLabel = useSelector((state: RootState) => state.annotator.activeLabel)
+  const activeVolume = useSelector((state: RootState) => state.annotator.activeVolume)
   const dispatch = useDispatch();
 
-  const setSelectedVolume = (url: string | undefined) => {
+  const setSelectedVolume = async (url: string | undefined) => {
 
     let full_url = BASE_URL.replace("{dataset_name}", dataset_name)
     full_url += "?file_path=" + url
-    // alert(`Selected volume with url: ${full_url}`)
 
     if (!url) return;
+
+    if (nvRef && activeLabel) {
+      try {
+        const blob = await getNiivueMaskBlob(nvRef as any, 'segmentation.nii.gz');
+        const reader = new FileReader();
+        reader.readAsDataURL(blob);
+        reader.onloadend = () => {
+          const base64data = reader.result as string;
+          localStorage.setItem(activeLabel, base64data);
+        }
+      } catch (e) {
+        console.error("No drawing layer found or failed to save mask:", e);
+      }
+    }
+
+    const cached_mask = activeLabel ? localStorage.getItem(activeLabel) : null;
+    if (cached_mask && activeLabel) {
+      dispatch(addLocalLabel({ name: activeLabel, mask: cached_mask }));
+    }
+
     dispatch(setActiveVolume(full_url))
   }
 

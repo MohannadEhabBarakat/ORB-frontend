@@ -7,6 +7,7 @@ import type { RootState } from "@/store/store";
 import { tailwindClassToRgb } from "./colorsConverter";
 import { setDownloadLabel, setReset, setSave } from "@/store/features/annotator/annotator";
 import { uploadMaskToBackend } from "./save";
+import { setNvRef } from "@/store/features/annotator/annotator";
 
 interface NiiVueProps {
   imageUrl: string | null;
@@ -35,6 +36,7 @@ export default function NiiVue({ imageUrl, labelUrl, view, brushColor = "red", b
   const downloadLabel = useSelector((state: RootState) => state.annotator.downloadLabel);
   const save = useSelector((state: RootState) => state.annotator.save);
   const reset = useSelector((state: RootState) => state.annotator.reset);
+  const localLabels = useSelector((state: RootState) => state.labels.localLabels);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -304,6 +306,7 @@ export default function NiiVue({ imageUrl, labelUrl, view, brushColor = "red", b
     // console.log("cmap", labels)
     // alert("hello")
     nvRef.current = null;
+    dispatch(setNvRef(nvRef.current));
 
 
     if (!imageUrl) return;
@@ -345,9 +348,15 @@ export default function NiiVue({ imageUrl, labelUrl, view, brushColor = "red", b
       console.log("labelUrl", labelUrl)
 
       if (labelUrl) {
-        nv.loadDrawingFromUrl(labelUrl);
+        const local_url = localStorage.getItem(labelUrl);
+        if (local_url) {
+          nv.loadDrawingFromUrl(local_url);
+        } else {
+          nv.loadDrawingFromUrl(labelUrl);
+        }
       }
       nvRef.current = nv;
+      dispatch(setNvRef(nvRef.current));
     }
 
     setupAndLoad(volumeList);

@@ -1,5 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit'
 import type { PayloadAction } from '@reduxjs/toolkit'
+import { Niivue } from "@niivue/niivue";
 
 export interface AnnotatorState {
   activeVolume: string | null,
@@ -7,6 +8,7 @@ export interface AnnotatorState {
   downloadLabel: boolean,
   reset: boolean
   save: boolean
+  nvRef: null | Niivue
 
 }
 
@@ -15,7 +17,8 @@ const initialState: AnnotatorState = {
   activeLabel: null,
   downloadLabel: false,
   reset: false,
-  save: false
+  save: false,
+  nvRef: null
 
 }
 
@@ -39,12 +42,16 @@ export const annotatorSlice = createSlice({
     setSave: (state, action: PayloadAction<boolean>) => {
       state.save = action.payload
     },
+    setNvRef: (state, action: PayloadAction<Niivue | null>) => {
+      state.nvRef = action.payload as any
+    },
+
 
 
   },
 })
 
 // Action creators are generated for each case reducer function
-export const { setActiveVolume, setActiveLabel, setDownloadLabel, setReset, setSave } = annotatorSlice.actions
+export const { setActiveVolume, setActiveLabel, setDownloadLabel, setReset, setSave, setNvRef } = annotatorSlice.actions
 
 export default annotatorSlice.reducer

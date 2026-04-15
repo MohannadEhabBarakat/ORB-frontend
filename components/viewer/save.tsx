@@ -34,7 +34,7 @@ export const uploadMaskToBackend = async (nvRef: React.RefObject<Niivue | null>,
 /**
  * Intercepts NiiVue's forced download to return a Blob instead.
  */
-const getNiivueMaskBlob = (nvInstance: Niivue, filename: string): Promise<Blob> => {
+export const getNiivueMaskBlob = (nvInstance: Niivue, filename: string): Promise<Blob> => {
     return new Promise((resolve, reject) => {
         // Save the browser's original click behavior
         const originalClick = HTMLAnchorElement.prototype.click;
