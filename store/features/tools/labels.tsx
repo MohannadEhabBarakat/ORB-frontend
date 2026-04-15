@@ -78,6 +78,9 @@ export const labelsSlice = createSlice({
       state.localLabels = state.localLabels.filter(label => label.name !== action.payload);
     },
     clearLocalLabels: (state) => {
+      state.localLabels.forEach(label => {
+        localStorage.removeItem(label.name);
+      });
       state.localLabels = [];
     },
   },

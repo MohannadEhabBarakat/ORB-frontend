@@ -44,6 +44,7 @@ export default function Tools() {
     dispatch(setTool(tool));
   };
   const saveAll = () => {
+
     dispatch(setSave(true));
   }
   const resetAll = () => {

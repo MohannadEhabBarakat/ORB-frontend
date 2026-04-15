@@ -12,13 +12,16 @@ import { useSelector, useDispatch } from 'react-redux'
 import { selectDataset, setToken, fetchDatasets, fetchWorklistSize } from '@/store/features/datasets/datasets'
 import type { RootState } from '@/store/store'
 import { useEffect } from "react"
+import { clearLocalLabels } from "@/store/features/tools/labels"
+import { useState } from "react"
+import { Loader2 } from "lucide-react"
 
 export function DatasetsLoader() {
     const selectedDataset = useSelector((state: RootState) => state.datasets.selectedDataset)
     const status = useSelector((state: RootState) => state.datasets.status)
     const datasets = useSelector((state: RootState) => state.datasets.datasets)
     const token = useSelector((state: RootState) => state.datasets.token)
-
+    const [loading, setLoading] = useState(false)
     const dispatch = useDispatch()
 
     const setSelectedDataset = (dataset: string) => {
@@ -42,8 +45,12 @@ export function DatasetsLoader() {
 
     const getAnnotator = (event: React.MouseEvent<HTMLButtonElement>) => {
         event.preventDefault();
+        setLoading(true)
+        dispatch(clearLocalLabels())
         // @ts-ignore
-        dispatch(fetchWorklistSize({ token, selectedDataset }))
+        dispatch(fetchWorklistSize({ token, selectedDataset })).unwrap().then(() => {
+            setLoading(false)
+        })
     }
 
 
@@ -64,10 +71,13 @@ export function DatasetsLoader() {
             </Combobox>
 
             <div className=" flex flex-row gap-2 justify-center items-center">
-                <Input value={token} placeholder="Token" disabled={selectedDataset === ""} onChange={(e) => onTokenChange(e.target.value)} />
-                <Button variant="outline" size="icon" className="size-8" onClick={(e) => getAnnotator(e)}>
-                    {'>'}
-                </Button>
+                {loading ? <Loader2 className="animate-spin" /> :
+                    <>
+                        <Input value={token} placeholder="Token" disabled={selectedDataset === ""} onChange={(e) => onTokenChange(e.target.value)} />
+                        <Button variant="outline" size="icon" className="size-8" onClick={(e) => getAnnotator(e)}>
+                            {'>'}
+                        </Button>
+                    </>}
             </div>
 
         </div>
