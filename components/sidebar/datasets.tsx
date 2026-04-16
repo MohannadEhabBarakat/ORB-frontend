@@ -8,6 +8,7 @@ import DatasetsCases from "./datasetsCases";
 import DatasetsLabels from "./datasetsLabels";
 import DatasetsPagination from "./datsetsPagination";
 import DatasetsMyLabels from "./datasetsMyLabels";
+import ActiveLabelSurvey from "./activeLabelSurvey";
 
 export default function Datasets() {
     const [isOpen, setIsOpen] = useState(false);
@@ -25,6 +26,7 @@ export default function Datasets() {
                 <DatasetsCases />
                 <DatasetsLabels />
                 <DatasetsMyLabels />
+                <ActiveLabelSurvey />
             </div>
             <div className=" grow-0"><DatasetsPagination /></div>
         </div>
