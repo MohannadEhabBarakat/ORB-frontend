@@ -6,8 +6,8 @@ import { apiFetch } from "@/store/api";
 import { Button } from "@/components/ui/button";
 
 const SurveyFormWidget = dynamic(
-  () => import("./surveyFormWidget"),
-  { ssr: false, loading: () => <div className="text-sm text-center p-2 text-muted-foreground">Loading Survey...</div> }
+    () => import("./surveyFormWidget"),
+    { ssr: false, loading: () => <div className="text-sm text-center p-2 text-muted-foreground">Loading Survey...</div> }
 );
 import {
     Collapsible,
@@ -104,9 +104,9 @@ export default function ActiveLabelSurvey() {
             body: JSON.stringify(submission)
         })
             .then(() => {
-                alert("Survey response saved successfully!");
+                // alert("Survey response saved successfully!");
                 formioInstance?.emit('submitDone');
-                setIsOpen(false);
+                // setTimeout(() => setIsOpen(false), 1000);
             })
             .catch(err => {
                 console.error("Failed to save survey response", err);
@@ -154,9 +154,9 @@ export default function ActiveLabelSurvey() {
             <CollapsibleContent className="flex  flex-col gap-2 max-h-full p-2">
                 {activeLabel && surveySchema && Object.keys(surveySchema).length > 0 ? (
                     <div style={{ backgroundColor: "white", padding: "10px", borderRadius: "8px" }} className="formio-isolated">
-                        <SurveyFormWidget 
-                            surveySchema={surveySchema} 
-                            handleSubmit={handleSubmit} 
+                        <SurveyFormWidget
+                            surveySchema={surveySchema}
+                            handleSubmit={handleSubmit}
                         />
                     </div>
                 ) : (
