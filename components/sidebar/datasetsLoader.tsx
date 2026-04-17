@@ -32,11 +32,7 @@ export function DatasetsLoader() {
         dispatch(setToken(token))
     }
 
-    useEffect(() => {
-        if (status === "loading") setSelectedDataset("Loading...")
-        else if (status === "failed") setSelectedDataset("Error")
-        else setSelectedDataset("Select a dataset")
-    }, [status])
+    // Removed the useEffect that pollutes selectedDataset with UI placeholder strings.
 
     useEffect(() => {
         // @ts-ignore
@@ -57,7 +53,11 @@ export function DatasetsLoader() {
     return (
         <div className=" flex flex-col gap-2 ">
             <Combobox items={datasets} onInputValueChange={(e) => setSelectedDataset(e)} disabled={status === "loading"}>
-                <ComboboxInput placeholder="Select a dataset" value={selectedDataset} showClear />
+                <ComboboxInput placeholder={
+                    status === "loading" ? "Loading..." : 
+                    status === "failed" ? "Error" : 
+                    "Select a dataset"
+                } value={selectedDataset} showClear />
                 <ComboboxContent >
                     <ComboboxEmpty>No items found.</ComboboxEmpty>
                     <ComboboxList >

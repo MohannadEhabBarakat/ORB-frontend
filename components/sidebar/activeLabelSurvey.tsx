@@ -99,7 +99,9 @@ export default function ActiveLabelSurvey() {
             return;
         }
 
-        apiFetch(`/datasets/${encodeURIComponent(selectedDataset)}/survey_responses?label_name=${encodeURIComponent(activeLabel)}`, {
+        const label_path = activeLabel.split("label?label_path=")[1];
+
+        apiFetch(`/datasets/${encodeURIComponent(selectedDataset)}/survey_responses?label_path=${encodeURIComponent(label_path)}`, {
             method: 'POST',
             body: JSON.stringify(submission)
         })

@@ -17,7 +17,14 @@ export const makeStore = () => {
       cases: caseReducer,
       annotator: annotatorReducer,
       datasets: datasetsReducer,
-    }
+    },
+    middleware: (getDefaultMiddleware) =>
+      getDefaultMiddleware({
+        serializableCheck: {
+          ignoredActions: ['annotator/setNvRef'],
+          ignoredPaths: ['annotator.nvRef'],
+        },
+      }),
   })
 }
 
