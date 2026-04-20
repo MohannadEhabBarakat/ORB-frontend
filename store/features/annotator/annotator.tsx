@@ -1,6 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit'
 import type { PayloadAction } from '@reduxjs/toolkit'
 import { Niivue } from "@niivue/niivue";
+import { RefObject } from "react";
 
 export interface AnnotatorState {
   activeVolume: string | null,
@@ -8,7 +9,7 @@ export interface AnnotatorState {
   downloadLabel: boolean,
   reset: boolean
   save: boolean
-  nvRef: null | Niivue
+  nvRef: RefObject<Niivue> | null
 
 }
 

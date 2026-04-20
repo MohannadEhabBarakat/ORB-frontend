@@ -39,12 +39,12 @@ export default function NiiVue({ imageUrl, labelUrl, view, brushColor = "red", b
   const localLabels = useSelector((state: RootState) => state.labels.localLabels);
   const dispatch = useDispatch();
 
-  useEffect(() => {
-    if (save && labelUrl) {
-      uploadMaskToBackend(nvRef, labelUrl);
-    }
-    dispatch(setSave(false));
-  }, [save])
+  // useEffect(() => {
+  //   if (save && labelUrl && datasetName) {
+  //     uploadMaskToBackend(nvRef, labelUrl, datasetName);
+  //   }
+  //   dispatch(setSave(false));
+  // }, [save, datasetName, labelUrl])
 
   useEffect(() => {
     if (reset) {

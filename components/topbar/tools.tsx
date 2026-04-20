@@ -11,11 +11,13 @@ import { getLabels, setOpacity } from "@/store/features/tools/labels";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
 import { setDownloadLabel, setReset, setSave } from "@/store/features/annotator/annotator";
+import { uploadMaskToBackend } from "@/components/viewer/save";
 
 export default function Tools() {
   const activeID = useSelector((state: RootState) => state.nav.active);
   const dispatch = useDispatch();
   const defaultToolSize = useSelector((state: RootState) => state.tool.size);
+  const nvRef = useSelector((state: RootState) => state.annotator.nvRef);
   const datasetName = useSelector((state: RootState) => state.datasets.selectedDataset);
   const labelUrl = useSelector((state: RootState) => state.annotator.activeLabel);
   const [toolActive, setToolActive] = useState("cursor");
@@ -24,6 +26,8 @@ export default function Tools() {
   const [sliderMax, setSliderMax] = useState(50);
   const [sliderMin, setSliderMin] = useState(0);
   const [sliderStep, setSliderStep] = useState(1);
+  const [lastSaved, setLastSaved] = useState<string | null>(null);
+
 
   const handleToolChange = (tool: string) => {
     if (tool === "eye") {
@@ -43,9 +47,11 @@ export default function Tools() {
     setToolActive(tool);
     dispatch(setTool(tool));
   };
-  const saveAll = () => {
-
+  const saveAll = async () => {
+    if (!nvRef || !labelUrl || !datasetName) return;
+    await uploadMaskToBackend(nvRef, labelUrl, datasetName)
     dispatch(setSave(true));
+    setLastSaved(new Date().toLocaleTimeString());
   }
   const resetAll = () => {
     dispatch(setReset(true));
@@ -165,6 +171,11 @@ export default function Tools() {
           <ArrowDownToLine />
         </Button>
       </ButtonGroup>
+      {lastSaved && (
+        <span className="text-xs text-muted-foreground animate-in fade-in slide-in-from-left-1 duration-300">
+          Last saved: {lastSaved}
+        </span>
+      )}
     </div>
   );
 }

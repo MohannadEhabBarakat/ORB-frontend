@@ -1,30 +1,27 @@
 import { Niivue } from "@niivue/niivue";
+import { apiFetchMultipart } from "@/store/api";
 
-export const uploadMaskToBackend = async (nvRef: React.RefObject<Niivue | null>, labelUrl: string) => {
-    const nv = nvRef.current;
+export const uploadMaskToBackend = async (nvRef: React.RefObject<Niivue | null>, labelUrl: string, datasetName: string) => {
+    const nv = nvRef;
     if (!nv) return;
 
     try {
         console.log("labelUrl", labelUrl);
+        const label_path = labelUrl.split("label?label_path=")[1];
+
         // 1. Get the compressed mask as a Blob (using the interceptor below)
+        // @ts-ignore
         const maskBlob = await getNiivueMaskBlob(nv, 'segmentation.nii.gz');
 
         // 2. Prepare the FormData for your backend
         const formData = new FormData();
         formData.append('file', maskBlob, 'segmentation.nii.gz');
+        if (label_path) formData.append('label_path', label_path);
+        if (datasetName) formData.append('dataset_name', datasetName);
 
         // 3. Send it off!
-        const response = await fetch('https://your-backend-api.com/upload-mask', {
-            method: 'POST',
-            body: formData,
-            // Add any necessary headers (like Authorization) here
-        });
-
-        if (response.ok) {
-            console.log('Mask successfully uploaded!');
-        } else {
-            console.error('Upload failed:', response.statusText);
-        }
+        const responseData = await apiFetchMultipart('/annotations/upload_mask', formData);
+        console.log('Mask successfully uploaded!', responseData);
 
     } catch (error) {
         console.error('Error extracting or uploading mask:', error);
