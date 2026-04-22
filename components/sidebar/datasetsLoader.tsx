@@ -15,6 +15,7 @@ import { useEffect } from "react"
 import { clearLocalLabels } from "@/store/features/tools/labels"
 import { useState } from "react"
 import { Loader2 } from "lucide-react"
+import { setActiveLabel, setActiveVolume } from "@/store/features/annotator/annotator"
 
 export function DatasetsLoader() {
     const selectedDataset = useSelector((state: RootState) => state.datasets.selectedDataset)
@@ -42,6 +43,8 @@ export function DatasetsLoader() {
     const getAnnotator = (event: React.MouseEvent<HTMLButtonElement>) => {
         event.preventDefault();
         setLoading(true)
+        dispatch(setActiveLabel(""))
+        dispatch(setActiveVolume(""))
         dispatch(clearLocalLabels())
         // @ts-ignore
         dispatch(fetchWorklistSize({ token, selectedDataset })).unwrap().then(() => {
@@ -54,9 +57,9 @@ export function DatasetsLoader() {
         <div className=" flex flex-col gap-2 ">
             <Combobox items={datasets} onInputValueChange={(e) => setSelectedDataset(e)} disabled={status === "loading"}>
                 <ComboboxInput placeholder={
-                    status === "loading" ? "Loading..." : 
-                    status === "failed" ? "Error" : 
-                    "Select a dataset"
+                    status === "loading" ? "Loading..." :
+                        status === "failed" ? "Error" :
+                            "Select a dataset"
                 } value={selectedDataset} showClear />
                 <ComboboxContent >
                     <ComboboxEmpty>No items found.</ComboboxEmpty>
