@@ -25,18 +25,21 @@ export default function Single({
   const show3D = useSelector((state: RootState) => state.global.show3D);
   return (
     <div className="w-full h-full flex flex-col">
-      <NiiVue
-        view={view}
-        imageUrl={activeVolume}
-        labelUrl={activeLabel}
-        brushColor={brushColor}
-        brushSize={brushSize}
-        activeTool={activeTool}
-        tool={activeTool}
-        isRadiology={isRadiology}
-        // nvRef={nvRef}
-        show3D={show3D}
-      />
+      {
+        activeVolume ? <NiiVue
+          view={view}
+          imageUrl={activeVolume}
+          labelUrl={activeLabel}
+          brushColor={brushColor}
+          brushSize={brushSize}
+          activeTool={activeTool}
+          tool={activeTool}
+          isRadiology={isRadiology}
+          // nvRef={nvRef}
+          show3D={show3D}
+        />
+          : <div className="flex items-center justify-center w-full h-full"> Please select a case</div>
+      }
     </div>
   );
 }

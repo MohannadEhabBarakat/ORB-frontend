@@ -17,6 +17,7 @@ import { setCurrentPage, fetchWorkItem } from '@/store/features/datasets/dataset
 import type { RootState } from '@/store/store'
 import { useEffect, useState, useRef } from "react"
 import { Input } from "@base-ui/react"
+import { setActiveLabel, setActiveVolume } from "@/store/features/annotator/annotator"
 
 export default function DatasetsPagination() {
     const worklistSize = useSelector((state: RootState) => state.datasets.worklist_size)
@@ -56,6 +57,9 @@ export default function DatasetsPagination() {
     const dispatch = useDispatch()
 
     const handlePageChange = (page: number) => {
+        // set case and label to empty
+        dispatch(setActiveLabel(""))
+        dispatch(setActiveVolume(""))
         dispatch(setCurrentPage(page))
     }
 

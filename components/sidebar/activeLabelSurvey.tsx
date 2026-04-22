@@ -46,9 +46,11 @@ export default function ActiveLabelSurvey() {
     const [labelStatus, setLabelStatus] = useState<WorkStatus>("not_started");
     const [isStatusLoading, setIsStatusLoading] = useState(false);
 
+
     const dispatch = useDispatch();
     const activeLabel = useSelector((state: RootState) => state.annotator.activeLabel);
     const selectedDataset = useSelector((state: RootState) => state.datasets.selectedDataset);
+    const activeVolume = useSelector((state: RootState) => state.annotator.activeVolume);
 
     useEffect(() => {
         const CDN_SHEETS: { id: string; href: string }[] = [
@@ -101,8 +103,10 @@ export default function ActiveLabelSurvey() {
 
     useEffect(() => {
         let mounted = true;
-        if (selectedDataset && activeLabel) {
+        // alert(activeLabel)
+        if (selectedDataset && activeLabel && activeLabel.includes("label?label_path=")) {
             const label_path = activeLabel.split("label?label_path=")[1];
+            if (!label_path) return;
 
             // Check survey submission status
             apiFetch<any>(`/datasets/${encodeURIComponent(selectedDataset)}/survey_responses?label_path=${encodeURIComponent(label_path)}`)
@@ -133,12 +137,14 @@ export default function ActiveLabelSurvey() {
             setIsSubmitted(false);
             setLabelStatus("not_started");
         }
+
         return () => { mounted = false };
     }, [selectedDataset, activeLabel]);
 
     const handleStatusChange = (newStatus: WorkStatus) => {
-        if (!activeLabel) return;
+        if (!activeLabel || !activeLabel.includes("label?label_path=")) return;
         const label_path = activeLabel.split("label?label_path=")[1];
+        if (!label_path) return;
 
         setLabelStatus(newStatus);
         apiFetch(`/annotators/label-status`, {
@@ -157,12 +163,13 @@ export default function ActiveLabelSurvey() {
 
     const handleSubmit = (submission: any, formioInstance?: any) => {
         console.log("Survey submitted for active label:", activeLabel, submission);
-        if (!selectedDataset || !activeLabel) {
+        if (!selectedDataset || !activeLabel || !activeLabel.includes("label?label_path=")) {
             formioInstance?.emit('submitError', "No active label or dataset");
             return;
         }
 
         const label_path = activeLabel.split("label?label_path=")[1];
+        if (!label_path) return;
 
         apiFetch(`/datasets/${encodeURIComponent(selectedDataset)}/survey_responses?label_path=${encodeURIComponent(label_path)}`, {
             method: 'POST',
@@ -218,14 +225,14 @@ export default function ActiveLabelSurvey() {
             </div>
 
             <CollapsibleContent className="flex  flex-col gap-2 max-h-full p-2">
-                {activeLabel && (
+                {activeLabel && activeVolume && (
                     <LabelStatusToggle
                         status={labelStatus}
                         onChange={handleStatusChange}
                         isLoading={isStatusLoading}
                     />
                 )}
-                {activeLabel && surveySchema && Object.keys(surveySchema).length > 0 ? (
+                {activeLabel && activeVolume && surveySchema && Object.keys(surveySchema).length > 0 ? (
                     <div style={{ backgroundColor: "white", padding: "10px", borderRadius: "8px" }} className="formio-isolated">
                         {isSubmitted ? (
                             <div className="flex flex-col items-center gap-4 py-8">
@@ -244,7 +251,7 @@ export default function ActiveLabelSurvey() {
                         )}
                     </div>
                 ) : (
-                    activeLabel ? <div className="text-sm text-center p-2 text-muted-foreground">No survey available for this dataset.</div> : <div className="text-sm text-center p-2 text-muted-foreground">Select an active label to view survey.</div>
+                    activeLabel ? <div className="text-sm text-center p-2 text-muted-foreground">No survey available for this dataset.</div> : <div className="text-sm text-center p-2 text-muted-foreground">Select a case & label to view survey.</div>
                 )}
             </CollapsibleContent>
         </Collapsible>
