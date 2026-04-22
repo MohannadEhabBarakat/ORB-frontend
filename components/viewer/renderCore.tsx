@@ -378,7 +378,7 @@ export default function NiiVue({ imageUrl, labelUrl, view, brushColor = "red", b
 
   return (
     <div className="relative inline-block w-full h-full" id="canvas-container">
-      {labelUrl}
+      {labelUrl ? labelUrl.split("label?label_path=")[1] : ""}
       <canvas ref={canvas}
         className={` w-full h-full`}
         key={imageUrl || "" + labelUrl || ""}

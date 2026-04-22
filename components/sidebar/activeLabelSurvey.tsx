@@ -98,12 +98,12 @@ export default function ActiveLabelSurvey() {
         }
         return () => { mounted = false };
     }, [selectedDataset]);
-    
+
     useEffect(() => {
         let mounted = true;
         if (selectedDataset && activeLabel) {
             const label_path = activeLabel.split("label?label_path=")[1];
-            
+
             // Check survey submission status
             apiFetch<any>(`/datasets/${encodeURIComponent(selectedDataset)}/survey_responses?label_path=${encodeURIComponent(label_path)}`)
                 .then(response => {
@@ -148,11 +148,11 @@ export default function ActiveLabelSurvey() {
                 status: newStatus
             })
         })
-        .catch(err => {
-            console.error("Failed to update label status", err);
-            // Revert on error? Or just show alert
-            alert("Failed to update status: " + err.message);
-        });
+            .catch(err => {
+                console.error("Failed to update label status", err);
+                // Revert on error? Or just show alert
+                alert("Failed to update status: " + err.message);
+            });
     };
 
     const handleSubmit = (submission: any, formioInstance?: any) => {
@@ -200,7 +200,7 @@ export default function ActiveLabelSurvey() {
                             <span className="sr-only">Toggle details</span>
                         </Button>
                     </CollapsibleTrigger>
-                    <h4 className="text-sm font-semibold">Survey</h4>
+                    <h4 className="text-sm font-semibold">Status/feedback</h4>
 
                     <Tooltip>
                         <TooltipTrigger asChild>

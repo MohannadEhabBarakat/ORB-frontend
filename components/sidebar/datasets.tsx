@@ -15,6 +15,8 @@ export default function Datasets() {
     const [uploadOpen, setUploadOpen] = useState(false);
     const fileTree = useSelector((state: RootState) => state.cases.fileTree);
     const dispatch = useDispatch();
+    const activeLabel = useSelector((state: RootState) => state.annotator.activeLabel);
+    const label_path = activeLabel?.split("label?label_path=")[1];
 
 
     return (
@@ -22,10 +24,10 @@ export default function Datasets() {
         <div className="flex flex-col w-full p-10 h-full justify-between gap-2 overflow-x-hidden">
             <div className=" grow-0"><DatasetsLoader /></div>
 
+
             <div className="flex flex-col grow">
                 <DatasetsCases />
                 <DatasetsLabels />
-                <DatasetsMyLabels />
                 <ActiveLabelSurvey />
             </div>
             <div className=" grow-0"><DatasetsPagination /></div>

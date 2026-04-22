@@ -33,15 +33,15 @@ export default function DatasetsLabels() {
     const [uploadOpen, setUploadOpen] = useState(false);
     const [fileTree, setFileTree] = useState<any[]>([]);
     const workItem = useSelector((state: RootState) => state.datasets.workItem);
-    const my_original_annotation = useSelector((state: RootState) => state.datasets.workItem?.my_original_annotation);
-    const base_annotation_is_ready = useSelector((state: RootState) => state.datasets.workItem?.base_annotation_is_ready);
-    const base_annotation = useSelector((state: RootState) => state.datasets.workItem?.base_annotation);
+    const annotation = useSelector((state: RootState) => state.datasets.workItem?.annotation);
+    const annotation_is_ready = useSelector((state: RootState) => state.datasets.workItem?.annotation_is_ready);
+    const type_ = useSelector((state: RootState) => state.datasets.workItem?.type_);
 
     const dispatch = useDispatch();
 
     useEffect(() => {
-        console.log("File tree updated:", workItem?.base_annotation);
-        setFileTree([workItem?.base_annotation]);
+        console.log("File tree updated:", workItem?.annotation);
+        setFileTree([workItem?.annotation]);
     }, [workItem]);
 
     return (
@@ -82,13 +82,13 @@ export default function DatasetsLabels() {
 
             <CollapsibleContent className="flex  flex-col gap-2 max-h-full">
                 {
-                    !my_original_annotation && base_annotation_is_ready && base_annotation ?
+                    annotation ?
                         <CollapsibleFilesLabelsTree prefix="base_labels" fileTree={fileTree} />
                         :
-                        !my_original_annotation && (!base_annotation_is_ready || !base_annotation) ?
-                            <p className="text-xs">No base annotation available</p>
+                        type_ == "review" ?
+                            <p className="text-xs">No base annotation available. please come back later</p>
                             :
-                            <p className="text-xs">No annotation. You are the first annotator for this case.</p>
+                            <p className="text-xs">No annotation. Create one to start</p>
                 }
             </CollapsibleContent>
         </Collapsible>

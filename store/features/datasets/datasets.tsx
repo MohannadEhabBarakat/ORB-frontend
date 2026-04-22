@@ -45,10 +45,10 @@ export type FileTreeItem = { name: string, url?: string, labels?: FileTreeItem[]
 
 export interface WorkItem {
   case: FileTreeItem[];
-  base_annotation: FileTreeItem[];
-  my_annotations: FileTreeItem[];
-  base_annotation_is_ready: boolean;
-  my_original_annotation: boolean;
+  annotation: FileTreeItem[];
+  type_: "review" | "my_annotation";
+  annotation_is_ready: boolean;
+
 }
 
 export interface DatasetsState {
