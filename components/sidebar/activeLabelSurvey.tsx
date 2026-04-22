@@ -45,6 +45,7 @@ export default function ActiveLabelSurvey() {
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [labelStatus, setLabelStatus] = useState<WorkStatus>("not_started");
     const [isStatusLoading, setIsStatusLoading] = useState(false);
+    const [showConfirmDone, setShowConfirmDone] = useState(false);
 
 
     const dispatch = useDispatch();
@@ -142,6 +143,14 @@ export default function ActiveLabelSurvey() {
     }, [selectedDataset, activeLabel]);
 
     const handleStatusChange = (newStatus: WorkStatus) => {
+        if (newStatus === "done") {
+            setShowConfirmDone(true);
+            return;
+        }
+        updateLabelStatus(newStatus);
+    };
+
+    const updateLabelStatus = (newStatus: WorkStatus) => {
         if (!activeLabel || !activeLabel.includes("label?label_path=")) return;
         const label_path = activeLabel.split("label?label_path=")[1];
         if (!label_path) return;
@@ -229,7 +238,8 @@ export default function ActiveLabelSurvey() {
                     <LabelStatusToggle
                         status={labelStatus}
                         onChange={handleStatusChange}
-                        isLoading={isStatusLoading}
+                        isLoading={isStatusLoading || labelStatus === "done"}
+
                     />
                 )}
                 {activeLabel && activeVolume && surveySchema && Object.keys(surveySchema).length > 0 ? (
@@ -254,6 +264,38 @@ export default function ActiveLabelSurvey() {
                     activeLabel ? <div className="text-sm text-center p-2 text-muted-foreground">No survey available for this dataset.</div> : <div className="text-sm text-center p-2 text-muted-foreground">Select a case & label to view survey.</div>
                 )}
             </CollapsibleContent>
+
+            <Dialog open={showConfirmDone} onOpenChange={setShowConfirmDone}>
+                <DialogContent className="max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>Confirm Completion</DialogTitle>
+                        <DialogDescription className="text-base text-foreground pt-4">
+                            Are you sure you want to mark it as done? Once you do this you can't undo it
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="flex justify-center gap-4 mt-6">
+                        <Button
+                            variant="outline"
+                            className="border-red-500 text-red-500 hover:bg-red-50 hover:text-red-600 bg-transparent px-8"
+                            onClick={() => {
+                                updateLabelStatus("done");
+                                setShowConfirmDone(false);
+                            }}
+                        >
+                            confirm
+                        </Button>
+                        <Button
+                            className="bg-green-600 hover:bg-green-700 text-white px-8"
+                            onClick={() => {
+                                updateLabelStatus("in_progress");
+                                setShowConfirmDone(false);
+                            }}
+                        >
+                            in progress
+                        </Button>
+                    </div>
+                </DialogContent>
+            </Dialog>
         </Collapsible>
 
     );
