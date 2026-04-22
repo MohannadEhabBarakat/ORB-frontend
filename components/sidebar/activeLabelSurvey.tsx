@@ -35,9 +35,16 @@ import type { RootState } from '@/store/store'
 import { DatasetsLoader } from "./datasetsLoader";
 import CollapsibleFilesLabelsTree from "./filesLabels";
 
+import { LabelStatusToggle } from "./labelStatusToggle";
+
+type WorkStatus = "not_started" | "in_progress" | "done";
+
 export default function ActiveLabelSurvey() {
     const [isOpen, setIsOpen] = useState(false);
     const [surveySchema, setSurveySchema] = useState<any>(null);
+    const [isSubmitted, setIsSubmitted] = useState(false);
+    const [labelStatus, setLabelStatus] = useState<WorkStatus>("not_started");
+    const [isStatusLoading, setIsStatusLoading] = useState(false);
 
     const dispatch = useDispatch();
     const activeLabel = useSelector((state: RootState) => state.annotator.activeLabel);
@@ -91,6 +98,62 @@ export default function ActiveLabelSurvey() {
         }
         return () => { mounted = false };
     }, [selectedDataset]);
+    
+    useEffect(() => {
+        let mounted = true;
+        if (selectedDataset && activeLabel) {
+            const label_path = activeLabel.split("label?label_path=")[1];
+            
+            // Check survey submission status
+            apiFetch<any>(`/datasets/${encodeURIComponent(selectedDataset)}/survey_responses?label_path=${encodeURIComponent(label_path)}`)
+                .then(response => {
+                    if (mounted) {
+                        setIsSubmitted(!!response);
+                    }
+                })
+                .catch(err => {
+                    console.error("Failed to check if survey is submitted", err);
+                });
+
+            // Fetch label status
+            setIsStatusLoading(true);
+            apiFetch<any>(`/annotators/label-status?label_path=${encodeURIComponent(label_path)}`)
+                .then(response => {
+                    if (mounted && response?.status) {
+                        setLabelStatus(response.status);
+                    }
+                })
+                .catch(err => {
+                    console.error("Failed to fetch label status", err);
+                })
+                .finally(() => {
+                    if (mounted) setIsStatusLoading(false);
+                });
+        } else {
+            setIsSubmitted(false);
+            setLabelStatus("not_started");
+        }
+        return () => { mounted = false };
+    }, [selectedDataset, activeLabel]);
+
+    const handleStatusChange = (newStatus: WorkStatus) => {
+        if (!activeLabel) return;
+        const label_path = activeLabel.split("label?label_path=")[1];
+
+        setLabelStatus(newStatus);
+        apiFetch(`/annotators/label-status`, {
+            method: 'PATCH',
+            body: JSON.stringify({
+                label_path,
+                status: newStatus
+            })
+        })
+        .catch(err => {
+            console.error("Failed to update label status", err);
+            // Revert on error? Or just show alert
+            alert("Failed to update status: " + err.message);
+        });
+    };
 
     const handleSubmit = (submission: any, formioInstance?: any) => {
         console.log("Survey submitted for active label:", activeLabel, submission);
@@ -108,6 +171,7 @@ export default function ActiveLabelSurvey() {
             .then(() => {
                 // alert("Survey response saved successfully!");
                 formioInstance?.emit('submitDone');
+                setIsSubmitted(true);
                 // setTimeout(() => setIsOpen(false), 1000);
             })
             .catch(err => {
@@ -154,12 +218,30 @@ export default function ActiveLabelSurvey() {
             </div>
 
             <CollapsibleContent className="flex  flex-col gap-2 max-h-full p-2">
+                {activeLabel && (
+                    <LabelStatusToggle
+                        status={labelStatus}
+                        onChange={handleStatusChange}
+                        isLoading={isStatusLoading}
+                    />
+                )}
                 {activeLabel && surveySchema && Object.keys(surveySchema).length > 0 ? (
                     <div style={{ backgroundColor: "white", padding: "10px", borderRadius: "8px" }} className="formio-isolated">
-                        <SurveyFormWidget
-                            surveySchema={surveySchema}
-                            handleSubmit={handleSubmit}
-                        />
+                        {isSubmitted ? (
+                            <div className="flex flex-col items-center gap-4 py-8">
+                                <div className="text-green-600 font-semibold flex items-center gap-2">
+                                    <span className="text-2xl">✓</span> Survey Submitted
+                                </div>
+                                <Button variant="outline" size="sm" onClick={() => setIsSubmitted(false)}>
+                                    Edit Submission
+                                </Button>
+                            </div>
+                        ) : (
+                            <SurveyFormWidget
+                                surveySchema={surveySchema}
+                                handleSubmit={handleSubmit}
+                            />
+                        )}
                     </div>
                 ) : (
                     activeLabel ? <div className="text-sm text-center p-2 text-muted-foreground">No survey available for this dataset.</div> : <div className="text-sm text-center p-2 text-muted-foreground">Select an active label to view survey.</div>
