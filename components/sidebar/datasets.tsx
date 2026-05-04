@@ -7,7 +7,6 @@ import { DatasetsLoader } from "./datasetsLoader";
 import DatasetsCases from "./datasetsCases";
 import DatasetsLabels from "./datasetsLabels";
 import DatasetsPagination from "./datsetsPagination";
-import DatasetsMyLabels from "./datasetsMyLabels";
 import ActiveLabelSurvey from "./activeLabelSurvey";
 
 export default function Datasets() {
