@@ -8,9 +8,9 @@ import {
 } from "@/components/ui/combobox"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { useSelector, useDispatch } from 'react-redux'
+import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { selectDataset, setToken, fetchDatasets, fetchWorklistSize } from '@/store/features/datasets/datasets'
-import type { RootState } from '@/store/store'
+
 import { useEffect } from "react"
 import { clearLocalLabels } from "@/store/features/tools/labels"
 import { useState } from "react"
@@ -18,12 +18,12 @@ import { Loader2 } from "lucide-react"
 import { setActiveLabel, setActiveVolume } from "@/store/features/annotator/annotator"
 
 export function DatasetsLoader() {
-    const selectedDataset = useSelector((state: RootState) => state.datasets.selectedDataset)
-    const status = useSelector((state: RootState) => state.datasets.status)
-    const datasets = useSelector((state: RootState) => state.datasets.datasets)
-    const token = useSelector((state: RootState) => state.datasets.token)
+    const selectedDataset = useAppSelector((state) => state.datasets.selectedDataset)
+    const status = useAppSelector((state) => state.datasets.status)
+    const datasets = useAppSelector((state) => state.datasets.datasets)
+    const token = useAppSelector((state) => state.datasets.token)
     const [loading, setLoading] = useState(false)
-    const dispatch = useDispatch()
+    const dispatch = useAppDispatch()
 
     const setSelectedDataset = (dataset: string) => {
         dispatch(selectDataset(dataset))
@@ -36,7 +36,6 @@ export function DatasetsLoader() {
     // Removed the useEffect that pollutes selectedDataset with UI placeholder strings.
 
     useEffect(() => {
-        // @ts-ignore
         dispatch(fetchDatasets())
     }, [dispatch])
 
@@ -46,7 +45,6 @@ export function DatasetsLoader() {
         dispatch(setActiveLabel(""))
         dispatch(setActiveVolume(""))
         dispatch(clearLocalLabels())
-        // @ts-ignore
         dispatch(fetchWorklistSize({ token, selectedDataset })).unwrap().then(() => {
             setLoading(false)
         })

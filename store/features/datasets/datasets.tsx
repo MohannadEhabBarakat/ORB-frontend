@@ -6,8 +6,10 @@ import { apiFetch, apiFetchMultipart } from '../../api';
 export const fetchDatasets = createAsyncThunk(
   'datasets/fetchDatasets', // Action type prefix
   async () => {
+    // alert("fetchDatasets")
     const response = await apiFetch<any[]>('/datasets');
-
+    // alert(JSON.stringify(response));
+    // console.log(response);
     const datasets = response?.map((dataset: any) => dataset.name);
     console.log(datasets)
     return datasets;
@@ -106,6 +108,7 @@ export const datasetsSlice = createSlice({
       .addCase(fetchDatasets.rejected, (state, action) => {
         state.status = 'failed';
         state.error = action.error.message || null;
+        console.log(action.error);
       })
       .addCase(fetchWorklistSize.pending, (state) => {
         state.worklist_status = 'loading';
