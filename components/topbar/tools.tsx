@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { setColor, setSize, setTool } from "@/store/features/tools/tools";
 import type { RootState } from "@/store/store";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { Pointer, Brush, Eraser, Eye, RotateCcw, Save, ArrowDownToLine } from "lucide-react";
+import { Pointer, Brush, Eraser, Eye, RotateCcw, Save, ArrowDownToLine, Loader2 } from "lucide-react";
 import ColorSelect from "./color/page";
 import { Slider } from "@/components/ui/slider";
 import { getLabels, setOpacity } from "@/store/features/tools/labels";
@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
 import { setDownloadLabel, setReset, setSave } from "@/store/features/annotator/annotator";
 import { uploadMaskToBackend } from "@/components/viewer/save";
+import { apiFetch } from "@/store/api";
 
 export default function Tools() {
   const activeID = useSelector((state: RootState) => state.nav.active);
@@ -27,6 +28,7 @@ export default function Tools() {
   const [sliderMin, setSliderMin] = useState(0);
   const [sliderStep, setSliderStep] = useState(1);
   const [lastSaved, setLastSaved] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
 
   const handleToolChange = (tool: string) => {
@@ -49,9 +51,16 @@ export default function Tools() {
   };
   const saveAll = async () => {
     if (!nvRef || !labelUrl || !datasetName) return;
-    await uploadMaskToBackend(nvRef, labelUrl, datasetName)
+    
+    setIsSaving(true);
+    
+    // Give React time to render the spinner before blocking the thread
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    await uploadMaskToBackend(nvRef, labelUrl, datasetName, undefined);
     dispatch(setSave(true));
     setLastSaved(new Date().toLocaleTimeString());
+    setIsSaving(false);
   }
   const resetAll = () => {
     dispatch(setReset(true));
@@ -156,8 +165,9 @@ export default function Tools() {
           aria-label="Toggle save"
           onClick={() => saveAll()}
           className="hover:cursor-pointer"
+          disabled={isSaving}
         >
-          <Save />
+          {isSaving ? <Loader2 className="animate-spin" /> : <Save />}
         </Button>
 
         <Button

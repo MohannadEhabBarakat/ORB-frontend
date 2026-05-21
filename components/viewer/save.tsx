@@ -1,7 +1,7 @@
 import { Niivue } from "@niivue/niivue";
 import { apiFetchMultipart } from "@/store/api";
 
-export const uploadMaskToBackend = async (nvRef: React.RefObject<Niivue | null>, labelUrl: string, datasetName: string) => {
+export const uploadMaskToBackend = async (nvRef: React.RefObject<Niivue | null>, labelUrl: string, datasetName: string, status?: string) => {
     const nv = nvRef;
     if (!nv) return;
 
@@ -18,6 +18,7 @@ export const uploadMaskToBackend = async (nvRef: React.RefObject<Niivue | null>,
         formData.append('file', maskBlob, 'segmentation.nii.gz');
         if (label_path) formData.append('label_path', label_path);
         if (datasetName) formData.append('dataset_name', datasetName);
+        if (status) formData.append('status', status);
 
         // 3. Send it off!
         const responseData = await apiFetchMultipart('/annotations/upload_mask', formData);
