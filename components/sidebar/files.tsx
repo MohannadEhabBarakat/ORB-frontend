@@ -63,17 +63,16 @@ export default function CollapsibleFileTree({fileTree}: {fileTree: FileTreeItem[
           <CollapsibleContent className="style-lyra:ml-4 mt-1 ml-5">
             {renderLabels(fileItem.labels)}
             <div className="flex flex-col gap-1">
-              {fileItem?.items?.map((child) => renderItem(child))}
+              {fileItem?.items?.map((child) => <div key={child.name}>{renderItem(child)}</div>)}
             </div>
           </CollapsibleContent>
         </Collapsible>
       );
     }
     return (
-      <>
+      <div key={fileItem.name}>
         {renderLabels(fileItem.labels)}
         <Button
-          key={fileItem.name}
           variant="link"
           size="sm"
           className="text-foreground grow justify-start gap-2"
@@ -82,7 +81,7 @@ export default function CollapsibleFileTree({fileTree}: {fileTree: FileTreeItem[
           <FileIcon />
           <span>{fileItem.name}</span>
         </Button>
-      </>
+      </div>
     );
   };
 
@@ -91,7 +90,7 @@ export default function CollapsibleFileTree({fileTree}: {fileTree: FileTreeItem[
       <CardContent className="max-h-full">
         <ScrollArea className=" w-full h-full p-2">
         <div className="flex flex-col gap-1">
-          {fileTree?.map((item) => renderItem(item))}
+          {fileTree?.map((item) => <div key={item.name}>{renderItem(item)}</div>)}
         </div>
       </ScrollArea>
       </CardContent>
