@@ -4,6 +4,7 @@ import type { RootState } from '@/store/store'
 import { ToggleDarkMode } from "./dark";
 import { ToggleRadiologyMode } from "./radiology";
 import { ChangeViewMode } from "./viewMode";
+import { ToggleFullscreen } from "./fullscreen";
 
 export default function Appearance() {
     return (
@@ -11,6 +12,7 @@ export default function Appearance() {
             <ChangeViewMode />
             <ToggleRadiologyMode />
             <ToggleDarkMode />
+            <ToggleFullscreen />
         </div>
     );
 }  
