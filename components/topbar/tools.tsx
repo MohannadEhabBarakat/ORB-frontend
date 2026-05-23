@@ -11,7 +11,7 @@ import { getLabels, setOpacity } from "@/store/features/tools/labels";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
 import { setDownloadLabel, setReset, setSave } from "@/store/features/annotator/annotator";
-import { uploadMaskToBackend } from "@/components/viewer/save";
+import { uploadMaskToBackend, getNiivueMaskBlob } from "@/components/viewer/save";
 import { apiFetch } from "@/store/api";
 
 export default function Tools() {
@@ -58,6 +58,20 @@ export default function Tools() {
     await new Promise((resolve) => setTimeout(resolve, 100));
 
     await uploadMaskToBackend(nvRef, labelUrl, datasetName, undefined);
+
+    // Update localStorage with the freshly-saved mask so the cache stays in sync
+    try {
+      const blob = await getNiivueMaskBlob(nvRef as any, 'segmentation.nii.gz');
+      const reader = new FileReader();
+      reader.readAsDataURL(blob);
+      reader.onloadend = () => {
+        const base64data = reader.result as string;
+        localStorage.setItem(labelUrl, base64data);
+      };
+    } catch (e) {
+      console.error("Failed to update localStorage after save:", e);
+    }
+
     dispatch(setSave(true));
     setLastSaved(new Date().toLocaleTimeString());
     setIsSaving(false);

@@ -153,14 +153,15 @@ export default function ActiveLabelSurvey() {
     const updateLabelStatus = (newStatus: WorkStatus) => {
         if (!activeLabel || !activeLabel.includes("label?label_path=")) return;
         const label_path = activeLabel.split("label?label_path=")[1];
-        if (!label_path) return;
+        if (!label_path || !selectedDataset) return;
 
         setLabelStatus(newStatus);
         apiFetch(`/annotators/label-status`, {
             method: 'PATCH',
             body: JSON.stringify({
                 label_path,
-                status: newStatus
+                status: newStatus,
+                dataset_name: selectedDataset
             })
         })
             .catch(err => {

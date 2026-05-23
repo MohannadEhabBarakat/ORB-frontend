@@ -57,7 +57,7 @@ export function DatasetsLoader() {
                 <ComboboxInput placeholder={
                     status === "loading" ? "Loading..." :
                         status === "failed" ? "Error" :
-                            "Select a dataset"
+                            "Select a study"
                 } value={selectedDataset} showClear />
                 <ComboboxContent >
                     <ComboboxEmpty>No items found.</ComboboxEmpty>
