@@ -36,6 +36,7 @@ import { DatasetsLoader } from "./datasetsLoader";
 import CollapsibleFilesLabelsTree from "./filesLabels";
 
 import { LabelStatusToggle } from "./labelStatusToggle";
+import { setStopRecording, setTriggerSave } from "@/store/features/annotator/annotator";
 
 type WorkStatus = "not_started" | "in_progress" | "done";
 
@@ -52,6 +53,7 @@ export default function ActiveLabelSurvey() {
     const activeLabel = useSelector((state: RootState) => state.annotator.activeLabel);
     const selectedDataset = useSelector((state: RootState) => state.datasets.selectedDataset);
     const activeVolume = useSelector((state: RootState) => state.annotator.activeVolume);
+    const lastSaved = useSelector((state: RootState) => state.annotator.lastSaved);
 
     useEffect(() => {
         const CDN_SHEETS: { id: string; href: string }[] = [
@@ -155,6 +157,12 @@ export default function ActiveLabelSurvey() {
         const label_path = activeLabel.split("label?label_path=")[1];
         if (!label_path || !selectedDataset) return;
 
+        // Signal rrweb recorder to stop when marking as done
+        if (newStatus === "done") {
+            dispatch(setStopRecording(true));
+            dispatch(setTriggerSave(true));
+        }
+
         setLabelStatus(newStatus);
         apiFetch(`/annotators/label-status`, {
             method: 'PATCH',
@@ -236,12 +244,18 @@ export default function ActiveLabelSurvey() {
 
             <CollapsibleContent className="flex  flex-col gap-2 max-h-full p-2">
                 {activeLabel && activeVolume && (
-                    <LabelStatusToggle
-                        status={labelStatus}
-                        onChange={handleStatusChange}
-                        isLoading={isStatusLoading || labelStatus === "done"}
-
-                    />
+                    <div className="flex flex-col">
+                        <LabelStatusToggle
+                            status={labelStatus}
+                            onChange={handleStatusChange}
+                            isLoading={isStatusLoading || labelStatus === "done"}
+                        />
+                        {labelStatus === "done" && lastSaved && (
+                            <span className="text-xs text-muted-foreground animate-in fade-in slide-in-from-left-1 duration-300 mt-1">
+                                Last saved: {lastSaved}
+                            </span>
+                        )}
+                    </div>
                 )}
                 {activeLabel && activeVolume && surveySchema && Object.keys(surveySchema).length > 0 ? (
                     <div style={{ backgroundColor: "white", padding: "10px", borderRadius: "8px" }} className="formio-isolated">

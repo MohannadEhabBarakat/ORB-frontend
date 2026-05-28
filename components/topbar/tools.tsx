@@ -7,10 +7,10 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Pointer, Brush, Eraser, Eye, RotateCcw, Save, ArrowDownToLine, Loader2 } from "lucide-react";
 import ColorSelect from "./color/page";
 import { Slider } from "@/components/ui/slider";
-import { getLabels, setOpacity } from "@/store/features/tools/labels";
+import { getLabels, setOpacity, setSelectedLabel } from "@/store/features/tools/labels";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
-import { setDownloadLabel, setReset, setSave } from "@/store/features/annotator/annotator";
+import { setDownloadLabel, setReset, setSave, setTriggerSave, setLastSaved } from "@/store/features/annotator/annotator";
 import { uploadMaskToBackend, getNiivueMaskBlob } from "@/components/viewer/save";
 import { apiFetch } from "@/store/api";
 
@@ -27,7 +27,8 @@ export default function Tools() {
   const [sliderMax, setSliderMax] = useState(50);
   const [sliderMin, setSliderMin] = useState(0);
   const [sliderStep, setSliderStep] = useState(1);
-  const [lastSaved, setLastSaved] = useState<string | null>(null);
+  const triggerSave = useSelector((state: RootState) => state.annotator.triggerSave);
+  const lastSaved = useSelector((state: RootState) => state.annotator.lastSaved);
   const [isSaving, setIsSaving] = useState(false);
 
 
@@ -48,6 +49,9 @@ export default function Tools() {
     setToolSize(defaultToolSize || 30);
     setToolActive(tool);
     dispatch(setTool(tool));
+    if (tool === "eraser") {
+      dispatch(setSelectedLabel(""));
+    }
   };
   const saveAll = async () => {
     if (!nvRef || !labelUrl || !datasetName) return;
@@ -73,9 +77,16 @@ export default function Tools() {
     }
 
     dispatch(setSave(true));
-    setLastSaved(new Date().toLocaleTimeString());
+    dispatch(setLastSaved(new Date().toLocaleTimeString()));
     setIsSaving(false);
   }
+
+  useEffect(() => {
+    if (triggerSave) {
+      saveAll();
+      dispatch(setTriggerSave(false));
+    }
+  }, [triggerSave]);
   const resetAll = () => {
     dispatch(setReset(true));
   }
