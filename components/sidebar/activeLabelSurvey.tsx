@@ -36,7 +36,7 @@ import { DatasetsLoader } from "./datasetsLoader";
 import CollapsibleFilesLabelsTree from "./filesLabels";
 
 import { LabelStatusToggle } from "./labelStatusToggle";
-import { setStopRecording, setTriggerSave } from "@/store/features/annotator/annotator";
+import { setStopRecording, setTriggerSave, setCaseStatus } from "@/store/features/annotator/annotator";
 
 type WorkStatus = "not_started" | "in_progress" | "done";
 
@@ -47,6 +47,7 @@ export default function ActiveLabelSurvey() {
     const [labelStatus, setLabelStatus] = useState<WorkStatus>("not_started");
     const [isStatusLoading, setIsStatusLoading] = useState(false);
     const [showConfirmDone, setShowConfirmDone] = useState(false);
+    const [showSurveyError, setShowSurveyError] = useState(false);
 
 
     const dispatch = useDispatch();
@@ -128,6 +129,7 @@ export default function ActiveLabelSurvey() {
                 .then(response => {
                     if (mounted && response?.status) {
                         setLabelStatus(response.status);
+                        dispatch(setCaseStatus(response.status));
                     }
                 })
                 .catch(err => {
@@ -139,13 +141,22 @@ export default function ActiveLabelSurvey() {
         } else {
             setIsSubmitted(false);
             setLabelStatus("not_started");
+            dispatch(setCaseStatus("not_started"));
         }
 
         return () => { mounted = false };
     }, [selectedDataset, activeLabel]);
 
+    const hasSurvey = surveySchema && Object.keys(surveySchema).length > 0;
+
     const handleStatusChange = (newStatus: WorkStatus) => {
+        setShowSurveyError(false);
         if (newStatus === "done") {
+            if (hasSurvey && !isSubmitted) {
+                setShowSurveyError(true);
+                setTimeout(() => setShowSurveyError(false), 5000);
+                return;
+            }
             setShowConfirmDone(true);
             return;
         }
@@ -164,6 +175,7 @@ export default function ActiveLabelSurvey() {
         }
 
         setLabelStatus(newStatus);
+        dispatch(setCaseStatus(newStatus));
         apiFetch(`/annotators/label-status`, {
             method: 'PATCH',
             body: JSON.stringify({
@@ -250,6 +262,11 @@ export default function ActiveLabelSurvey() {
                             onChange={handleStatusChange}
                             isLoading={isStatusLoading || labelStatus === "done"}
                         />
+                        {showSurveyError && (
+                            <p className="text-xs text-red-500 font-medium animate-in fade-in slide-in-from-top-1 duration-300 mt-1">
+                                Please submit the survey before marking as Done.
+                            </p>
+                        )}
                         {labelStatus === "done" && lastSaved && (
                             <span className="text-xs text-muted-foreground animate-in fade-in slide-in-from-left-1 duration-300 mt-1">
                                 Last saved: {lastSaved}

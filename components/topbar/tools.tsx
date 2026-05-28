@@ -29,6 +29,7 @@ export default function Tools() {
   const [sliderStep, setSliderStep] = useState(1);
   const triggerSave = useSelector((state: RootState) => state.annotator.triggerSave);
   const lastSaved = useSelector((state: RootState) => state.annotator.lastSaved);
+  const caseStatus = useSelector((state: RootState) => state.annotator.caseStatus);
   const [isSaving, setIsSaving] = useState(false);
 
 
@@ -190,7 +191,7 @@ export default function Tools() {
           aria-label="Toggle save"
           onClick={() => saveAll()}
           className="hover:cursor-pointer"
-          disabled={isSaving}
+          disabled={isSaving || caseStatus === "done"}
         >
           {isSaving ? <Loader2 className="animate-spin" /> : <Save />}
         </Button>
