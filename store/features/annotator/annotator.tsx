@@ -10,7 +10,10 @@ export interface AnnotatorState {
   reset: boolean
   save: boolean
   nvRef: RefObject<Niivue> | null
-
+  stopRecording: boolean
+  triggerSave: boolean
+  lastSaved: string | null
+  caseStatus: string | null
 }
 
 const initialState: AnnotatorState = {
@@ -19,8 +22,11 @@ const initialState: AnnotatorState = {
   downloadLabel: false,
   reset: false,
   save: false,
-  nvRef: null
-
+  nvRef: null,
+  stopRecording: false,
+  triggerSave: false,
+  lastSaved: null,
+  caseStatus: null
 }
 
 export const annotatorSlice = createSlice({
@@ -46,13 +52,23 @@ export const annotatorSlice = createSlice({
     setNvRef: (state, action: PayloadAction<Niivue | null>) => {
       state.nvRef = action.payload as any
     },
-
-
+    setStopRecording: (state, action: PayloadAction<boolean>) => {
+      state.stopRecording = action.payload
+    },
+    setTriggerSave: (state, action: PayloadAction<boolean>) => {
+      state.triggerSave = action.payload
+    },
+    setLastSaved: (state, action: PayloadAction<string | null>) => {
+      state.lastSaved = action.payload
+    },
+    setCaseStatus: (state, action: PayloadAction<string | null>) => {
+      state.caseStatus = action.payload
+    },
 
   },
 })
 
 // Action creators are generated for each case reducer function
-export const { setActiveVolume, setActiveLabel, setDownloadLabel, setReset, setSave, setNvRef } = annotatorSlice.actions
+export const { setActiveVolume, setActiveLabel, setDownloadLabel, setReset, setSave, setNvRef, setStopRecording, setTriggerSave, setLastSaved, setCaseStatus } = annotatorSlice.actions
 
 export default annotatorSlice.reducer

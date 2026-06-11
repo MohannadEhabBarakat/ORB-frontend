@@ -7,9 +7,13 @@ import {
 import MainMenu from "@/components/sidebar/mainMenu";
 import Topbar from "@/components/topbar/topbar";
 import Viewer from "@/components/viewer/viewer";
+import { useRrwebRecorder } from "@/hooks/useRrwebRecorder";
 
 
 export default function Home() {
+  // Start/stop rrweb recording based on activeLabel + activeVolume
+  useRrwebRecorder();
+
   return (
     <div className="w-full h-full flex flex-col">
       <Topbar />
