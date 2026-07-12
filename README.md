@@ -1,36 +1,56 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ORB - Open Rad Bench
+
+ORB - Open Rad Bench is a Next.js application designed for annotating and viewing medical imaging data. It integrates a powerful medical imaging viewer with form generation and session recording capabilities.
+
+## Tech Stack
+
+- **Framework**: Next.js 16
+- **UI Library**: React 19
+- **Styling**: Tailwind CSS v4, shadcn/ui, @base-ui/react
+- **State Management**: Redux Toolkit
+- **Imaging Viewer**: @niivue/niivue (for rendering neuroimaging data)
+- **Form Generation**: @formio/react
+- **Session Recording**: rrweb
 
 ## Getting Started
 
-First, run the development server:
+First, install the dependencies. You can use either `bun` or `npm`:
 
 ```bash
+# Using bun
+bun install
+
+# Using npm
+npm install
+```
+
+Then, run the development server:
+
+```bash
+# Using bun
+bun run dev
+
+# Using npm
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Project Structure
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `app/`: Next.js App Router (Pages, Layouts).
+- `components/`: React components, including:
+  - `viewer/`: Medical imaging viewer components powered by Niivue.
+  - `sidebar/`: Main menu and sidebar configurations.
+  - `topbar/`: Top navigation bar.
+  - `ui/`: Reusable UI components from shadcn.
+- `hooks/`: Custom React hooks (e.g., `useRrwebRecorder` for session recording).
+- `store/`: Redux store configuration and slices.
+- `lib/`: Utility functions and library configurations.
 
-## Learn More
+## Key Features
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **Medical Imaging Viewing**: Seamless integration with Niivue for advanced visualization of medical imaging files.
+- **Dynamic Forms**: Utilizing Form.io to render dynamic forms for complex annotations.
+- **Session Recording**: Automatic recording of user interactions and state changes using rrweb.
+- **Resizable Layouts**: Flexible UI panels built with `react-resizable-panels`.
